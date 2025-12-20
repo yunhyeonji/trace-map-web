@@ -33,7 +33,20 @@ const eslintConfig = [
       'no-var': 'error',
       'prefer-const': 'error',
       'no-undef': 'error',
-      'simple-import-sort/imports': 'error',
+      'simple-import-sort/imports': [
+        'error',
+        {
+          groups: [
+            ['^react', '^react-dom'], // React 관련
+            ['^next'], // Next.js 관련
+            ['^@?\\w'], // 외부 패키지
+            ['^(@|components|lib|app)(/.*|$)'], // 내부 모듈
+            ['^\\u0000'], // 사이드 이펙트
+            ['^\\.\\.(?!/?$)', '^\\.\\./?$'], // 상대 경로 (상위)
+            ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'], // 상대 경로 (같은 디렉토리)
+          ],
+        },
+      ],
       'simple-import-sort/exports': 'error',
     },
   },
