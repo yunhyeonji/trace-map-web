@@ -1,5 +1,8 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.useAliasesForRenames": false,
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit"
   },

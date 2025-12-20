@@ -8,6 +8,7 @@ import Logo from '@/assets/image/logo.png';
 import { Button } from '@/components/ui/button';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 
+import { ThemeToggle } from '../theme/themeToggle';
 import { Kbd, KbdGroup } from '../ui/kbd';
 
 const Header = () => {
@@ -47,9 +48,7 @@ const Header = () => {
           <Button size="icon-sm" variant="outline" aria-label="새 여행 기록 추가">
             <span className="i-lucide-plus size-4" aria-hidden />
           </Button>
-          <Button size="icon-sm" variant="outline" aria-label="새 장소 추가">
-            <span className="i-lucide-map-pin size-4" aria-hidden />
-          </Button>
+          <ThemeToggle />
           <Button size="icon-sm" variant="ghost" aria-label="프로필">
             <div className="bg-muted flex size-7 items-center justify-center rounded-full text-xs font-medium">
               TM
