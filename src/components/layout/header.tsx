@@ -3,8 +3,8 @@ import React from 'react';
 import Image from 'next/image';
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import Logo from '@/assets/image/logo.png';
 
+import Logo from '@/assets/image/logo.png';
 import { Button } from '@/components/ui/button';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 
