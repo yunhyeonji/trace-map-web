@@ -1,11 +1,11 @@
-import Image from 'next/image';
-
 import { Calendar, Users } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDateRange } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import { Travel } from '@/service/travels/types';
+
+import ImageCell from './ImageCell.client';
 
 interface TravelCardProps {
   travel: Travel;
@@ -25,22 +25,7 @@ export const TravelCard = ({ travel, isSelected = false, onClick }: TravelCardPr
       )}
       onClick={onClick}
     >
-      <div className="relative aspect-3/1 overflow-hidden">
-        <div className="from-background/20 absolute inset-0 z-10 bg-linear-to-t to-transparent" />
-        {travel.coverPhoto ? (
-          <Image
-            src={travel.coverPhoto}
-            alt={travel.travelName}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="grid h-full w-full place-items-center bg-gray-200 font-semibold text-gray-400">
-            이미지 없음
-          </div>
-        )}
-      </div>
+      <ImageCell travel={travel} />
 
       <CardContent className="p-6">
         <h3 className="group-hover:text-primary mb-2 line-clamp-2 text-xl font-bold tracking-tight transition-colors">

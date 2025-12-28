@@ -93,6 +93,9 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
 
 export const getTravelList = async (): Promise<Travel[]> => {
   try {
+    // 스켈레톤 테스트를 위한 지연
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
+
     const response = await notionClient.databases.query({
       database_id: process.env.NOTION_DATABASE_ID!,
       sorts: [
