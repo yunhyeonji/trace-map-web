@@ -7,14 +7,14 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
   try {
     const properties = page.properties;
 
-    // travelName (title)
+    // 1. travelName (title)
     const travelNameProperty = properties[NOTION_PROPERTIES.TRAVEL_NAME];
     const travelName =
       travelNameProperty && 'title' in travelNameProperty
         ? travelNameProperty.title.map((text) => text.plain_text).join('')
         : '';
 
-    // date (date)
+    // 2. date (date)
     const dateProperty = properties[NOTION_PROPERTIES.DATE];
     const date =
       dateProperty && 'date' in dateProperty && dateProperty.date
@@ -24,19 +24,19 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
           }
         : null;
 
-    // destination (rich_text 또는 url)
-    const destinationProperty = properties[NOTION_PROPERTIES.DESTINATION];
-    let destination: string | null = null;
-    if (destinationProperty) {
-      if ('rich_text' in destinationProperty) {
-        destination = destinationProperty.rich_text.map((text) => text.plain_text).join('') || null;
-      } else if ('url' in destinationProperty && destinationProperty.url) {
-        destination = destinationProperty.url;
+    // 3. location (rich_text 또는 url)
+    const locationProperty = properties[NOTION_PROPERTIES.LOCATION];
+    let location: string | null = null;
+    if (locationProperty) {
+      if ('rich_text' in locationProperty) {
+        location = locationProperty.rich_text.map((text) => text.plain_text).join('') || null;
+      } else if ('url' in locationProperty && locationProperty.url) {
+        location = locationProperty.url;
       }
     }
 
-    // companions (multi_select 또는 people)
-    const companionsProperty = properties[NOTION_PROPERTIES.COMPANIONS];
+    // 4. companions (multi_select 또는 people) - camelCase 유지
+    const companionsProperty = properties[NOTION_PROPERTIES.PEOPLE];
     let companions: string[] = [];
     if (companionsProperty) {
       if ('multi_select' in companionsProperty) {
@@ -48,8 +48,8 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
       }
     }
 
-    // coverPhoto (files)
-    const coverPhotoProperty = properties[NOTION_PROPERTIES.COVER_PHOTO];
+    // 5. coverPhoto (files)
+    const coverPhotoProperty = properties[NOTION_PROPERTIES.COVER];
     let coverPhoto: string | null = null;
     if (
       coverPhotoProperty &&
@@ -66,21 +66,30 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
       }
     }
 
-    // summary (rich_text)
-    const summaryProperty = properties[NOTION_PROPERTIES.SUMMARY];
-    const summary =
-      summaryProperty && 'rich_text' in summaryProperty
-        ? summaryProperty.rich_text.map((text) => text.plain_text).join('') || null
+    // 6. memo (rich_text)
+    const memoProperty = properties[NOTION_PROPERTIES.MEMO];
+    const memo =
+      memoProperty && 'rich_text' in memoProperty
+        ? memoProperty.rich_text.map((text) => text.plain_text).join('') || null
         : null;
 
+    // 7. tags
+    const tagsProperty = properties[NOTION_PROPERTIES.TAGS];
+    const tags =
+      tagsProperty && 'multi_select' in tagsProperty
+        ? tagsProperty.multi_select.map((item) => item.name)
+        : null;
+
+    // 최종 반환 객체 속성명 통일
     return {
       id: page.id,
       travelName,
       date,
-      destination,
+      location,
       companions,
       coverPhoto,
-      summary,
+      memo,
+      tags,
       url: page.url,
       createdTime: page.created_time,
       lastEditedTime: page.last_edited_time,
@@ -93,9 +102,6 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
 
 export const getTravelList = async (): Promise<Travel[]> => {
   try {
-    // 스켈레톤 테스트를 위한 지연
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
-
     const response = await notionClient.databases.query({
       database_id: process.env.NOTION_DATABASE_ID!,
       sorts: [

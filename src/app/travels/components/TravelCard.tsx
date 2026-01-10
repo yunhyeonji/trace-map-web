@@ -28,14 +28,25 @@ export const TravelCard = ({ travel, isSelected = false, onClick }: TravelCardPr
       <ImageCell travel={travel} />
 
       <CardContent className="p-6">
+        {travel.tags && (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {travel.tags.map((tag) => (
+              <span
+                key={tag}
+                className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-sm font-medium"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
         <h3 className="group-hover:text-primary mb-2 line-clamp-2 text-xl font-bold tracking-tight transition-colors">
           {travel.travelName}
         </h3>
 
-        {travel.summary && (
-          <p className="text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-            {travel.summary}
-          </p>
+        {travel.memo && (
+          <p className="text-muted-foreground mt-2 line-clamp-2 leading-relaxed">{travel.memo}</p>
         )}
 
         <div className="text-muted-foreground mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">

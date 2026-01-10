@@ -2,10 +2,11 @@
 export const NOTION_PROPERTIES = {
   TRAVEL_NAME: 'travelName',
   DATE: 'date',
-  DESTINATION: 'destination',
-  COMPANIONS: 'companions',
-  COVER_PHOTO: 'coverPhoto',
-  SUMMARY: 'summary',
+  LOCATION: 'location',
+  PEOPLE: 'people',
+  COVER: 'cover',
+  MEMO: 'memo',
+  TAGS: 'tags',
 } as const;
 
 // 여행 데이터 타입
@@ -16,10 +17,11 @@ export interface Travel {
     start: string | null;
     end: string | null;
   } | null;
-  destination: string | null;
+  location: string | null;
   companions: string[];
   coverPhoto: string | null;
-  summary: string | null;
+  memo: string | null;
+  tags: string[] | null; //
   url: string;
   createdTime: string;
   lastEditedTime: string;
