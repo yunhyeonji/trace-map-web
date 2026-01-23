@@ -126,6 +126,10 @@ shadcn/ui의 모든 컴포넌트들은 CSS 변수(예: --card, --primary 등)를
   body {
     @apply bg-background text-foreground; /* 배경색과 텍스트 색상 기본값 설정 */
   }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .container {
