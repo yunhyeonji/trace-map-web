@@ -3,10 +3,7 @@ import React, { use, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
+import { Filter } from '@/components/layout/filter';
 import { TravelListResponse } from '@/service/travels/types';
 
 import { TravelCard } from './TravelCard';
@@ -22,7 +19,7 @@ const TravelsSuspence = ({ promiseTravels }: Props) => {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
 
-  // 2. 필터링된 데이터 계산
+  // 2. 최종적으로 화면에 렌더링할 필터링된 리스트
   const filteredTravels = useMemo(() => {
     return travels.filter((travel) => {
       const countryMatch =
@@ -36,76 +33,54 @@ const TravelsSuspence = ({ promiseTravels }: Props) => {
     });
   }, [travels, selectedCountries, selectedYears]);
 
-  // 필터 핸들러
-  const toggleFilter = (
-    list: string[],
-    setList: React.Dispatch<React.SetStateAction<string[]>>,
-    value: string
-  ) => {
-    setList((prev) => (prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value]));
+  // 3. 실시간 필터 개수 집계 (Faceted Search 로직)
+  const { countryCounts, yearCounts } = useMemo(() => {
+    const cCounts: Record<string, number> = {};
+    const yCounts: Record<string, number> = {};
+
+    // 초기값 세팅 (모든 필터를 0으로 초기화)
+    filters.countries.forEach((c) => (cCounts[c.code] = 0));
+    filters.years.forEach((y) => (yCounts[y.year] = 0));
+
+    // '현재 필터링된 결과물'을 돌면서 개수를 셉니다.
+    filteredTravels.forEach((t) => {
+      if (t.countryCode) {
+        cCounts[t.countryCode] = (cCounts[t.countryCode] || 0) + 1;
+      }
+      if (t.date?.start) {
+        const y = new Date(t.date.start).getFullYear().toString();
+        yCounts[y] = (yCounts[y] || 0) + 1;
+      }
+    });
+
+    return { countryCounts: cCounts, yearCounts: yCounts };
+  }, [filteredTravels, filters]);
+
+  // 필터 토글 핸들러
+  const handleCountryToggle = (code: string) => {
+    setSelectedCountries((prev) =>
+      prev.includes(code) ? prev.filter((i) => i !== code) : [...prev, code]
+    );
+  };
+
+  const handleYearToggle = (year: string) => {
+    setSelectedYears((prev) =>
+      prev.includes(year) ? prev.filter((i) => i !== year) : [...prev, year]
+    );
   };
 
   return (
     <div className="flex flex-col gap-8 py-6 md:flex-row">
-      {/* --- 좌측 필터 사이드바 --- */}
-      <aside className="sticky top-(--sticky-top) flex h-fit w-full flex-col gap-6 rounded-xl border px-3 py-2 md:w-64">
-        <h2 className="font-semibold">검색 필터</h2>
-        <Separator />
-
-        <div>
-          <h3 className="mb-4 text-sm font-semibold">여행 국가</h3>
-          <div className="grid gap-3">
-            {filters.countries.map((c) => (
-              <div key={c.code} className="flex items-center justify-between space-x-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`country-${c.code}`}
-                    checked={selectedCountries.includes(c.code)}
-                    onCheckedChange={() =>
-                      toggleFilter(selectedCountries, setSelectedCountries, c.code)
-                    }
-                  />
-                  <Label
-                    htmlFor={`country-${c.code}`}
-                    className="cursor-pointer text-sm leading-none font-medium"
-                  >
-                    {c.name}
-                  </Label>
-                </div>
-                <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
-                  {c.count}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="mb-4 text-sm font-semibold">여행 연도</h3>
-          <div className="grid gap-3">
-            {filters.years.map((y) => (
-              <div key={y.year} className="flex items-center justify-between space-x-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`year-${y.year}`}
-                    checked={selectedYears.includes(y.year)}
-                    onCheckedChange={() => toggleFilter(selectedYears, setSelectedYears, y.year)}
-                  />
-                  <Label
-                    htmlFor={`year-${y.year}`}
-                    className="cursor-pointer text-sm leading-none font-medium"
-                  >
-                    {y.year}년
-                  </Label>
-                </div>
-                <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
-                  {y.count}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-      </aside>
+      {/* --- 분리된 필터 컴포넌트 연결 --- */}
+      <Filter
+        filters={filters}
+        selectedCountries={selectedCountries}
+        selectedYears={selectedYears}
+        countryCounts={countryCounts}
+        yearCounts={yearCounts}
+        onCountryChange={handleCountryToggle}
+        onYearChange={handleYearToggle}
+      />
 
       {/* --- 우측 리스트 영역 --- */}
       <div className="flex flex-1 flex-col gap-4">
@@ -119,7 +94,7 @@ const TravelsSuspence = ({ promiseTravels }: Props) => {
           </div>
         ) : (
           filteredTravels.map((travel) => (
-            <Link key={travel.id} href={`travels/${travel.id}`}>
+            <Link key={travel.id} href={`/travels/${travel.id}`}>
               <TravelCard travel={travel} />
             </Link>
           ))
