@@ -13,7 +13,7 @@ import { Kbd, KbdGroup } from '../ui/kbd';
 
 const Header = () => {
   return (
-    <header className="bg-background/80 sticky top-0 z-30 border-b shadow backdrop-blur">
+    <header className="bg-background sticky top-0 z-30 border-b shadow backdrop-blur">
       <div className="container flex h-(--header-height) items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">

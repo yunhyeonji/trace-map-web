@@ -3,6 +3,8 @@ export const NOTION_PROPERTIES = {
   TRAVEL_NAME: 'travelName',
   DATE: 'date',
   LOCATION: 'location',
+  COUNTRY: 'country',
+  COUNTRYCODE: 'countryCode',
   PEOPLE: 'people',
   COVER: 'cover',
   MEMO: 'memo',
@@ -18,11 +20,21 @@ export interface Travel {
     end: string | null;
   } | null;
   location: string | null;
+  country: string | null;
+  countryCode: string | null;
   companions: string[];
   coverPhoto: string | null;
   memo: string | null;
-  tags: string[] | null; //
+  tags: string[] | null;
   url: string;
   createdTime: string;
   lastEditedTime: string;
+}
+
+export interface TravelListResponse {
+  travels: Travel[];
+  filters: {
+    countries: { name: string; code: string; count: number }[];
+    years: { year: string; count: number }[];
+  };
 }

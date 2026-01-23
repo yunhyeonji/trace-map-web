@@ -1,6 +1,6 @@
 /* eslint-disable simple-import-sort/imports */
 import { notionClient } from '@/lib/notion';
-import { NOTION_PROPERTIES, Travel } from './types';
+import { NOTION_PROPERTIES, Travel, TravelListResponse } from './types';
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 const parseListData = (page: PageObjectResponse): Travel | null => {
@@ -34,6 +34,16 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
         location = locationProperty.url;
       }
     }
+
+    const countryProperty = properties[NOTION_PROPERTIES.COUNTRY];
+    const country =
+      countryProperty && 'select' in countryProperty ? countryProperty.select?.name || null : null;
+
+    const countryCodeProperty = properties[NOTION_PROPERTIES.COUNTRYCODE];
+    const countryCode =
+      countryCodeProperty && 'rich_text' in countryCodeProperty
+        ? countryCodeProperty.rich_text.map((t) => t.plain_text).join('') || null
+        : null;
 
     // 4. companions (multi_select 또는 people) - camelCase 유지
     const companionsProperty = properties[NOTION_PROPERTIES.PEOPLE];
@@ -78,7 +88,7 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
     const tags =
       tagsProperty && 'multi_select' in tagsProperty
         ? tagsProperty.multi_select.map((item) => item.name)
-        : null;
+        : [];
 
     // 최종 반환 객체 속성명 통일
     return {
@@ -86,6 +96,8 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
       travelName,
       date,
       location,
+      country,
+      countryCode,
       companions,
       coverPhoto,
       memo,
@@ -100,7 +112,7 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
   }
 };
 
-export const getTravelList = async (): Promise<Travel[]> => {
+export const getTravelList = async (): Promise<TravelListResponse> => {
   try {
     const response = await notionClient.databases.query({
       database_id: process.env.NOTION_DATABASE_ID!,
@@ -112,12 +124,45 @@ export const getTravelList = async (): Promise<Travel[]> => {
       ],
     });
 
-    const posts = response.results
+    const travels = response.results
       .filter((page): page is PageObjectResponse => 'properties' in page)
       .map(parseListData)
       .filter((post): post is Travel => post !== null);
 
-    return posts;
+    // --- 집계 로직 시작 (필터 데이터 계산) ---
+    const countryStats: Record<string, { name: string; count: number }> = {};
+    const yearStats: Record<string, number> = {};
+
+    travels.forEach((t) => {
+      // 국가 집계
+      if (t.country && t.countryCode) {
+        const countryCode = t.countryCode;
+        if (!countryStats[countryCode]) {
+          countryStats[countryCode] = { name: t.country, count: 0 };
+        }
+        countryStats[countryCode].count++;
+      }
+
+      // 연도 집계 (시작일 기준)
+      if (t.date?.start) {
+        const year = new Date(t.date.start).getFullYear().toString();
+        yearStats[year] = (yearStats[year] || 0) + 1;
+      }
+    });
+
+    return {
+      travels,
+      filters: {
+        countries: Object.entries(countryStats).map(([code, info]) => ({
+          code,
+          name: info.name,
+          count: info.count,
+        })),
+        years: Object.entries(yearStats)
+          .map(([year, count]) => ({ year, count }))
+          .sort((a, b) => b.year.localeCompare(a.year)), // 최신 연도순
+      },
+    };
   } catch (error) {
     console.error('Notion API 에러:', error);
     throw error;
