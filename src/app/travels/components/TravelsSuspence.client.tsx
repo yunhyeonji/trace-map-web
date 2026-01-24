@@ -3,109 +3,79 @@ import React, { use, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { TravelListResponse } from '@/service/travels/types';
+import { Filter } from '@/components/ui/common/filter';
+import { CommonResponse } from '@/service/common';
+import { Travel } from '@/service/travels/types';
 
 import { TravelCard } from './TravelCard';
 
 interface Props {
-  promiseTravels: Promise<TravelListResponse>;
+  promiseTravels: Promise<CommonResponse<Travel[]>>;
 }
 
 const TravelsSuspence = ({ promiseTravels }: Props) => {
-  const { travels, filters } = use(promiseTravels);
+  const { data: travels, metadata } = use(promiseTravels);
+  const initialFilters = metadata?.filters;
 
-  // 1. 필터 상태 관리
-  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [selectedYears, setSelectedYears] = useState<string[]>([]);
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({
+    country: [],
+    year: [],
+  });
 
-  // 2. 필터링된 데이터 계산
+  // 필터링 로직
   const filteredTravels = useMemo(() => {
-    return travels.filter((travel) => {
-      const countryMatch =
-        selectedCountries.length === 0 ||
-        (travel.countryCode && selectedCountries.includes(travel.countryCode));
-
-      const year = travel.date?.start ? new Date(travel.date.start).getFullYear().toString() : null;
-      const yearMatch = selectedYears.length === 0 || (year && selectedYears.includes(year));
-
-      return countryMatch && yearMatch;
+    return travels.filter((t) => {
+      return Object.entries(selectedFilters).every(([type, codes]) => {
+        if (codes.length === 0) return true;
+        if (type === 'country') return t.countryCode && codes.includes(t.countryCode);
+        if (type === 'year') {
+          const y = t.date?.start ? new Date(t.date.start).getFullYear().toString() : null;
+          return y && codes.includes(y);
+        }
+        return true;
+      });
     });
-  }, [travels, selectedCountries, selectedYears]);
+  }, [travels, selectedFilters]);
 
-  // 필터 핸들러
-  const toggleFilter = (
-    list: string[],
-    setList: React.Dispatch<React.SetStateAction<string[]>>,
-    value: string
-  ) => {
-    setList((prev) => (prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value]));
+  // 2. 실시간 개수가 반영된 필터 그룹 생성 (사이드바 렌더링용)
+  const dynamicFilters = useMemo(() => {
+    return initialFilters?.map((group) => ({
+      ...group,
+      items: group.items.map((item) => {
+        const currentCount = filteredTravels.filter((t) => {
+          if (group.type === 'country') return t.countryCode === item.code;
+          if (group.type === 'year') {
+            const y = t.date?.start ? new Date(t.date.start).getFullYear().toString() : null;
+            return y === item.code;
+          }
+          return false;
+        }).length;
+
+        return { ...item, count: currentCount };
+      }),
+    }));
+  }, [filteredTravels, initialFilters]);
+
+  // 통합 핸들러
+  const handleFilterChange = (type: string, code: string) => {
+    setSelectedFilters((prev) => {
+      const prevList = prev[type] || [];
+      const newList = prevList.includes(code)
+        ? prevList.filter((c) => c !== code)
+        : [...prevList, code];
+
+      return { ...prev, [type]: newList };
+    });
   };
 
   return (
     <div className="flex flex-col gap-8 py-6 md:flex-row">
-      {/* --- 좌측 필터 사이드바 --- */}
-      <aside className="sticky top-(--sticky-top) flex h-fit w-full flex-col gap-6 rounded-xl border px-3 py-2 md:w-64">
-        <h2 className="font-semibold">검색 필터</h2>
-        <Separator />
-
-        <div>
-          <h3 className="mb-4 text-sm font-semibold">여행 국가</h3>
-          <div className="grid gap-3">
-            {filters.countries.map((c) => (
-              <div key={c.code} className="flex items-center justify-between space-x-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`country-${c.code}`}
-                    checked={selectedCountries.includes(c.code)}
-                    onCheckedChange={() =>
-                      toggleFilter(selectedCountries, setSelectedCountries, c.code)
-                    }
-                  />
-                  <Label
-                    htmlFor={`country-${c.code}`}
-                    className="cursor-pointer text-sm leading-none font-medium"
-                  >
-                    {c.name}
-                  </Label>
-                </div>
-                <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
-                  {c.count}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="mb-4 text-sm font-semibold">여행 연도</h3>
-          <div className="grid gap-3">
-            {filters.years.map((y) => (
-              <div key={y.year} className="flex items-center justify-between space-x-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`year-${y.year}`}
-                    checked={selectedYears.includes(y.year)}
-                    onCheckedChange={() => toggleFilter(selectedYears, setSelectedYears, y.year)}
-                  />
-                  <Label
-                    htmlFor={`year-${y.year}`}
-                    className="cursor-pointer text-sm leading-none font-medium"
-                  >
-                    {y.year}년
-                  </Label>
-                </div>
-                <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
-                  {y.count}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-      </aside>
+      {/* --- 분리된 필터 컴포넌트 연결 --- */}
+      <Filter
+        filterGroups={dynamicFilters ?? []}
+        selectedFilters={selectedFilters}
+        onFilterChange={handleFilterChange}
+      />
 
       {/* --- 우측 리스트 영역 --- */}
       <div className="flex flex-1 flex-col gap-4">
@@ -119,7 +89,7 @@ const TravelsSuspence = ({ promiseTravels }: Props) => {
           </div>
         ) : (
           filteredTravels.map((travel) => (
-            <Link key={travel.id} href={`travels/${travel.id}`}>
+            <Link key={travel.id} href={`/travels/${travel.id}`}>
               <TravelCard travel={travel} />
             </Link>
           ))
