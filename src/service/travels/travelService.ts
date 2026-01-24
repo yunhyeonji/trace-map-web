@@ -1,7 +1,10 @@
-/* eslint-disable simple-import-sort/imports */
-import { notionClient } from '@/lib/notion';
-import { NOTION_PROPERTIES, Travel, TravelListResponse } from './types';
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+
+import { notionClient } from '@/lib/notion';
+
+import { CommonResponse } from '../common';
+
+import { NOTION_PROPERTIES, Travel } from './types';
 
 const parseListData = (page: PageObjectResponse): Travel | null => {
   try {
@@ -112,16 +115,11 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
   }
 };
 
-export const getTravelList = async (): Promise<TravelListResponse> => {
+export const getTravelList = async (): Promise<CommonResponse<Travel[]>> => {
   try {
     const response = await notionClient.databases.query({
       database_id: process.env.NOTION_DATABASE_ID!,
-      sorts: [
-        {
-          property: NOTION_PROPERTIES.DATE,
-          direction: 'descending',
-        },
-      ],
+      sorts: [{ property: NOTION_PROPERTIES.DATE, direction: 'descending' }],
     });
 
     const travels = response.results
@@ -134,16 +132,12 @@ export const getTravelList = async (): Promise<TravelListResponse> => {
     const yearStats: Record<string, number> = {};
 
     travels.forEach((t) => {
-      // 국가 집계
       if (t.country && t.countryCode) {
-        const countryCode = t.countryCode;
-        if (!countryStats[countryCode]) {
-          countryStats[countryCode] = { name: t.country, count: 0 };
-        }
-        countryStats[countryCode].count++;
+        countryStats[t.countryCode] = {
+          name: t.country,
+          count: (countryStats[t.countryCode]?.count || 0) + 1,
+        };
       }
-
-      // 연도 집계 (시작일 기준)
       if (t.date?.start) {
         const year = new Date(t.date.start).getFullYear().toString();
         yearStats[year] = (yearStats[year] || 0) + 1;
@@ -151,20 +145,32 @@ export const getTravelList = async (): Promise<TravelListResponse> => {
     });
 
     return {
-      travels,
-      filters: {
-        countries: Object.entries(countryStats).map(([code, info]) => ({
-          code,
-          name: info.name,
-          count: info.count,
-        })),
-        years: Object.entries(yearStats)
-          .map(([year, count]) => ({ year, count }))
-          .sort((a, b) => b.year.localeCompare(a.year)), // 최신 연도순
+      success: true,
+      status: { code: 200, message: '성공' },
+      data: travels,
+      metadata: {
+        filters: [
+          {
+            type: 'country',
+            title: '여행 국가',
+            items: Object.entries(countryStats).map(([code, info]) => ({
+              code,
+              name: info.name,
+              count: info.count,
+            })),
+          },
+          {
+            type: 'year',
+            title: '여행 연도',
+            items: Object.entries(yearStats)
+              .map(([year, count]) => ({ code: year, name: `${year}년`, count }))
+              .sort((a, b) => b.code.localeCompare(a.code)),
+          },
+        ],
       },
     };
   } catch (error) {
-    console.error('Notion API 에러:', error);
-    throw error;
+    console.error('getTravelList Error:', error);
+    throw new Error('노션 데이터를 가져오는 중에 문제가 발생했습니다.');
   }
 };
