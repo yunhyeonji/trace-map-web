@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { getTravelList } from '@/service/travelsList/travelListService';
+import { getTravelsList } from '@/service/travelsList/travelListService';
 
 import { ErrorFallback } from '../../../components/ui/common/ErrorFallback';
 
@@ -9,7 +9,7 @@ import ListSkeleton from './components/ListSkeleton';
 import TravelsSuspence from './components/TravelsSuspence.client';
 
 const TravelsPage = async () => {
-  const promiseTravels = getTravelList();
+  const promiseTravels = getTravelsList();
 
   return (
     <div className="container">

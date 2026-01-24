@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 
-import { getTravelList } from '@/service/travelsList/travelListService';
+import { getTravelsList } from '@/service/travelsList/travelListService';
 
 export async function GET() {
   try {
-    const travels = await getTravelList();
+    const travels = await getTravelsList();
     return NextResponse.json(travels);
   } catch (error) {
     console.error('API 에러:', error);
