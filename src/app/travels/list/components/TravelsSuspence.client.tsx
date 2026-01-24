@@ -3,7 +3,7 @@ import React, { use, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
-import { Filter } from '@/components/ui/common/Filter';
+import { Filter } from '@/components/ui/common/filter';
 import { CommonResponse } from '@/service/common';
 import { Travel } from '@/service/travelsList/types';
 

@@ -1,12 +1,14 @@
 'use client';
+import { use } from 'react';
+
 import { Calendar, Clock, Globe, MapPin } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import StatCard from './StatCard';
-import WorldMapClient from './WorldMap.client';
 import { CommonResponse } from '@/service/common';
 import { DashboardData } from '@/service/dashboard/types';
-import { use } from 'react';
+
+import StatCard from './StatCard';
+import WorldMapClient from './WorldMap.client';
 
 interface Props {
   promiseDashBoard: Promise<CommonResponse<DashboardData>>;
