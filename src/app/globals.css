@@ -1,0 +1,179 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* 1. 다크모드 설정 */
+@custom-variant dark (&:is(.dark *));
+
+/* 2. 전역 컬러 팔레트 (Primitive Palette)
+   - 실제 색상 값을 여기서 한 번에 관리합니다. 
+   - 500이 기본, 600이 호버용으로 설계되었습니다.
+*/
+:root {
+  /* Blue Palette (Main / Info) */
+  --blue-50: hsl(210 100% 96%);
+  --blue-100: hsl(210 100% 90%);
+  --blue-500: hsl(217 91% 60%); /* 기본 포인트 */
+  --blue-600: hsl(217 91% 50%); /* 호버용 */
+  --blue-900: hsl(222 47% 11%); /* 텍스트용 */
+
+  /* Green Palette (Success / Chart) */
+  --green-500: hsl(160 84% 39%);
+  --green-600: hsl(160 84% 30%);
+
+  /* Red Palette (Destructive / Error) */
+  --red-500: hsl(0 84% 60%);
+  --red-600: hsl(0 84% 50%);
+
+  /* Yellow Palette (Warning / Chart) */
+  --yellow-500: hsl(45 93% 47%);
+  --yellow-600: hsl(45 93% 40%);
+
+  /* Neutral (Slate/Zinc Mix) */
+  --neutral-50: hsl(210 40% 98%);
+  --neutral-100: hsl(214 32% 91%);
+  --neutral-400: hsl(215 16% 47%);
+  --neutral-900: hsl(222 47% 4%);
+}
+
+/* 3. 라이트모드 의미적 매핑 (Semantic Tokens)
+*/
+:root {
+  --background: var(--neutral-50);
+  --foreground: var(--blue-900);
+
+  --card: hsl(0 0% 100%);
+  --card-foreground: var(--blue-900);
+
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: var(--blue-900);
+
+  /* Primary & Hover */
+  --primary: var(--blue-500);
+  --primary-hover: var(--blue-600);
+  --primary-foreground: var(--neutral-50);
+
+  --secondary: var(--neutral-100);
+  --secondary-foreground: var(--blue-900);
+
+  --muted: var(--neutral-100);
+  --muted-foreground: var(--neutral-400);
+
+  --accent: var(--neutral-100);
+  --accent-foreground: var(--blue-900);
+
+  --destructive: var(--red-500);
+  --destructive-hover: var(--red-600);
+  --destructive-foreground: var(--neutral-50);
+
+  --border: var(--neutral-100);
+  --input: var(--neutral-100);
+  --ring: var(--blue-500);
+
+  /* 오버레이 */
+  --overlay: rgba(0, 0, 0, 0.5);
+
+  /* 차트: 팔레트에서 가져와서 관리 */
+  --chart-1: var(--blue-500);
+  --chart-2: var(--green-500);
+  --chart-3: var(--yellow-500);
+  --chart-4: hsl(280 65% 60%);
+  --chart-5: hsl(340 75% 55%);
+
+  --radius: 0.75rem;
+  --header-height: 5rem;
+  --sticky-offset: 1.5rem;
+  --sticky-top: calc(var(--header-height) + var(--sticky-offset));
+}
+
+/* 4. 다크모드 의미적 매핑 
+*/
+.dark {
+  --background: var(--neutral-900);
+  --foreground: var(--neutral-50);
+
+  --card: var(--neutral-900);
+  --card-foreground: var(--neutral-50);
+
+  --popover: var(--neutral-900);
+  --popover-foreground: var(--neutral-50);
+
+  /* 다크모드에서는 가독성을 위해 한 단계 밝은 색을 쓰기도 합니다 */
+  --primary: var(--blue-500);
+  --primary-hover: var(--blue-100);
+  --primary-foreground: var(--blue-900);
+
+  --secondary: hsl(217 33% 17%);
+  --secondary-foreground: var(--neutral-50);
+
+  --muted: hsl(217 33% 17%);
+  --muted-foreground: var(--neutral-400);
+
+  --accent: hsl(217 33% 17%);
+  --accent-foreground: var(--neutral-50);
+
+  --destructive: hsl(0 63% 31%);
+  --destructive-foreground: var(--neutral-50);
+
+  --border: hsl(217 33% 17%);
+  --input: hsl(217 33% 17%);
+  --ring: var(--blue-500);
+
+  /* 오버레이 */
+  --overlay: rgba(0, 0, 0, 0.25);
+}
+
+/* 5. 테마 인라인 설정 */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* 6. 기본 스타일 레이어 */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.container {
+  @apply mx-auto max-w-6xl px-4;
+  width: 100%;
+}
