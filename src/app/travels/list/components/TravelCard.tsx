@@ -3,7 +3,7 @@ import { Calendar, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDateRange } from '@/lib/date';
 import { cn } from '@/lib/utils';
-import { Travel } from '@/service/travels/types';
+import { Travel } from '@/service/travelsList/types';
 
 import ImageCell from './ImageCell.client';
 

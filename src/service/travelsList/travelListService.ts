@@ -6,7 +6,7 @@ import { CommonResponse } from '../common';
 
 import { NOTION_PROPERTIES, Travel } from './types';
 
-const parseListData = (page: PageObjectResponse): Travel | null => {
+export const parseListData = (page: PageObjectResponse): Travel | null => {
   try {
     const properties = page.properties;
 
@@ -47,6 +47,12 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
       countryCodeProperty && 'rich_text' in countryCodeProperty
         ? countryCodeProperty.rich_text.map((t) => t.plain_text).join('') || null
         : null;
+
+    const citysProperty = properties[NOTION_PROPERTIES.CITYS];
+    let citys: string[] = [];
+    if (citysProperty && 'multi_select' in citysProperty) {
+      citys = citysProperty.multi_select.map((item) => item.name);
+    }
 
     // 4. companions (multi_select 또는 people) - camelCase 유지
     const companionsProperty = properties[NOTION_PROPERTIES.PEOPLE];
@@ -101,6 +107,7 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
       location,
       country,
       countryCode,
+      citys,
       companions,
       coverPhoto,
       memo,
@@ -115,7 +122,7 @@ const parseListData = (page: PageObjectResponse): Travel | null => {
   }
 };
 
-export const getTravelList = async (): Promise<CommonResponse<Travel[]>> => {
+export const getTravelsList = async (): Promise<CommonResponse<Travel[]>> => {
   try {
     const response = await notionClient.databases.query({
       database_id: process.env.NOTION_DATABASE_ID!,
@@ -170,7 +177,7 @@ export const getTravelList = async (): Promise<CommonResponse<Travel[]>> => {
       },
     };
   } catch (error) {
-    console.error('getTravelList Error:', error);
+    console.error('getTravelsList Error:', error);
     throw new Error('노션 데이터를 가져오는 중에 문제가 발생했습니다.');
   }
 };

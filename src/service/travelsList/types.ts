@@ -5,6 +5,7 @@ export const NOTION_PROPERTIES = {
   LOCATION: 'location',
   COUNTRY: 'country',
   COUNTRYCODE: 'countryCode',
+  CITYS: 'citys',
   PEOPLE: 'people',
   COVER: 'cover',
   MEMO: 'memo',
@@ -22,6 +23,7 @@ export interface Travel {
   location: string | null;
   country: string | null;
   countryCode: string | null;
+  citys: string[] | null;
   companions: string[];
   coverPhoto: string | null;
   memo: string | null;
