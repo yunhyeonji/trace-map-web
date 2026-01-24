@@ -3,9 +3,9 @@ import React, { use, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
-import { Filter } from '@/components/ui/common/filter';
+import { Filter } from '@/components/ui/common/Filter';
 import { CommonResponse } from '@/service/common';
-import { Travel } from '@/service/travels/types';
+import { Travel } from '@/service/travelsList/types';
 
 import { TravelCard } from './TravelCard';
 
