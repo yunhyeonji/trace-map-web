@@ -14,7 +14,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
           resetErrorBoundary();
           window.location.reload();
         }}
-        className="bg-primary hover:bg-primary/90 rounded-md px-4 py-2 text-white shadow-sm transition-colors"
+        className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-4 py-2 shadow-sm transition-colors"
       >
         다시 시도하기
       </button>

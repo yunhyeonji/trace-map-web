@@ -1,8 +1,13 @@
+import React from 'react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { StatCardType } from '../data';
-
-// 재사용 가능한 통계 카드 컴포넌트
+interface StatCardType {
+  title: string;
+  value: string;
+  description: string;
+  icon: React.ReactNode;
+}
 export default function StatCard({ title, value, description, icon }: StatCardType) {
   return (
     <Card className="border-primary">
