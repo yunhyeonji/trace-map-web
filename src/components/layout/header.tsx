@@ -15,7 +15,7 @@ import { Kbd, KbdGroup } from '../ui/kbd';
 const Header = () => {
   return (
     <header className="bg-background sticky top-0 z-30 border-b shadow backdrop-blur">
-      <div className="container flex h-(--header-height) items-center gap-4">
+      <div className="flex h-(--header-height) items-center gap-4 px-7">
         <Link href="/travels/bashboard" className="flex items-center gap-2">
           <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
             <Image src={Logo} alt="TraceMap 로고" className="h-9 w-9 rounded-full object-cover" />
