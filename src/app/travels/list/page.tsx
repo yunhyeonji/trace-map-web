@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import { getTravelList } from '@/service/travels/travelService';
+import { getTravelList } from '@/service/travelsList/travelListService';
 
 import { ErrorFallback } from '../../../components/ui/common/ErrorFallback';
 

@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 
 import { cn } from '@/lib/utils';
-import { Travel } from '@/service/travels/types';
+import { Travel } from '@/service/travelsList/types';
 
 const ImageCell = ({ travel }: { travel: Travel }) => {
   const hasImage = Boolean(travel.coverPhoto);
@@ -20,7 +20,7 @@ const ImageCell = ({ travel }: { travel: Travel }) => {
   return (
     <div className="group relative aspect-3/1 overflow-hidden">
       {!loaded && (
-        <div className="absolute inset-0 z-20 animate-pulse bg-linear-to-r from-gray-200 via-gray-300 to-gray-200" />
+        <div className="from-muted via-muted to-muted absolute inset-0 z-20 animate-pulse bg-linear-to-r" />
       )}
 
       {travel.coverPhoto ? (
@@ -39,7 +39,7 @@ const ImageCell = ({ travel }: { travel: Travel }) => {
           <div className="from-background/20 absolute inset-0 z-10 bg-linear-to-t to-transparent" />
         </>
       ) : (
-        <div className="grid h-full w-full place-items-center bg-gray-200 font-semibold text-gray-400">
+        <div className="bg-muted text-muted-foreground grid h-full w-full place-items-center font-semibold">
           이미지 없음
         </div>
       )}

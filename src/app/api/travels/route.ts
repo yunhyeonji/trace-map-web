@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getTravelList } from '@/service/travels/travelService';
+import { getTravelList } from '@/service/travelsList/travelListService';
 
 export async function GET() {
   try {
