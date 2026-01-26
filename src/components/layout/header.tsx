@@ -3,7 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 import Logo from '@/assets/image/logo.png';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,38 @@ import { Kbd, KbdGroup } from '../ui/kbd';
 
 const Header = () => {
   return (
-    <header className="bg-background sticky top-0 z-30 border-b shadow backdrop-blur">
-      <div className="flex h-(--header-height) items-center gap-4 px-7">
+    <header className="bg-background/80 sticky top-0 z-30 border-b shadow backdrop-blur">
+      {/* 모바일 헤더 */}
+      <div className="container flex h-(--header-height) items-center gap-2 px-3 md:hidden">
+        <Link href="/travels/bashboard" className="flex min-w-0 items-center gap-2">
+          <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+            <Image src={Logo} alt="TraceMap 로고" className="h-7 w-7 rounded-full object-cover" />
+          </div>
+          <div className="flex min-w-0 flex-col leading-tight">
+            <span className="text-muted-foreground truncate text-xs font-semibold tracking-tight">
+              TraceMap
+            </span>
+          </div>
+        </Link>
+
+        <div className="ml-auto flex shrink-0 items-center gap-1">
+          <Button size="icon-sm" variant="ghost" aria-label="검색">
+            <MagnifyingGlassIcon className="h-4 w-4" />
+          </Button>
+          <Button size="icon-sm" variant="ghost" aria-label="새 여행 기록 추가">
+            <PlusIcon className="h-4 w-4" />
+          </Button>
+          <ThemeToggle />
+          <Button size="icon-sm" variant="ghost" aria-label="프로필">
+            <div className="bg-muted flex size-7 items-center justify-center rounded-full text-xs font-medium">
+              TM
+            </div>
+          </Button>
+        </div>
+      </div>
+
+      {/* 데스크톱 헤더 */}
+      <div className="container hidden h-(--header-height) items-center gap-4 md:flex">
         <Link href="/travels/bashboard" className="flex items-center gap-2">
           <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
             <Image src={Logo} alt="TraceMap 로고" className="h-9 w-9 rounded-full object-cover" />
@@ -46,8 +76,8 @@ const Header = () => {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <Button size="icon-sm" variant="outline" aria-label="새 여행 기록 추가">
-            <span className="i-lucide-plus size-4" aria-hidden />
+          <Button size="icon-sm" variant="ghost" aria-label="새 여행 기록 추가">
+            <PlusIcon className="h-4 w-4" />
           </Button>
           <ThemeToggle />
           <Button size="icon-sm" variant="ghost" aria-label="프로필">
