@@ -5,9 +5,11 @@ import { Calendar, Clock, Globe, MapPin } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CommonResponse } from '@/service/common';
+import { getMonthlyTravelCount } from '@/service/dashboard/dashboardService';
 import { DashboardData } from '@/service/dashboard/types';
 
 import StatCard from './StatCard';
+import TravelTrendChart from './TravelTrendChart.client';
 import WorldMapClient from './WorldMap.client';
 
 interface Props {
@@ -17,7 +19,6 @@ interface Props {
 function DashboardSuspence({ promiseDashBoard }: Props) {
   const { data } = use(promiseDashBoard);
 
-  // 상단 카드 데이터를 실제 데이터로 매핑
   const iconClassName = 'text-muted-foreground h-9 w-9';
   const statData = [
     {
@@ -89,7 +90,7 @@ function DashboardSuspence({ promiseDashBoard }: Props) {
           <CardHeader>
             <CardTitle className="text-base">대륙별 분포</CardTitle>
           </CardHeader>
-          <CardContent className="bg-muted/10 flex h-62.5 items-center justify-center">
+          <CardContent className="bg-muted/10 flex h-62.5 items-center justify-center px-2">
             Donut Chart
           </CardContent>
         </Card>
@@ -98,8 +99,8 @@ function DashboardSuspence({ promiseDashBoard }: Props) {
           <CardHeader>
             <CardTitle className="text-base">올해의 흐름</CardTitle>
           </CardHeader>
-          <CardContent className="bg-muted/10 flex h-62.5 items-center justify-center">
-            Line Chart
+          <CardContent className="bg-muted/10 flex h-62.5 items-center justify-center px-2">
+            <TravelTrendChart data={getMonthlyTravelCount(data.travels)} />
           </CardContent>
         </Card>
 
@@ -107,7 +108,7 @@ function DashboardSuspence({ promiseDashBoard }: Props) {
           <CardHeader>
             <CardTitle className="text-base">계절/동행인</CardTitle>
           </CardHeader>
-          <CardContent className="bg-muted/10 flex h-62.5 items-center justify-center">
+          <CardContent className="bg-muted/10 flex h-62.5 items-center justify-center px-2">
             Radar or Bar Chart
           </CardContent>
         </Card>
