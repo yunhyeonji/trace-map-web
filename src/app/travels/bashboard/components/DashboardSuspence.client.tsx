@@ -5,12 +5,12 @@ import { Calendar, Clock, Globe, MapPin } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CommonResponse } from '@/service/common';
+import { getMonthlyTravelCount } from '@/service/dashboard/dashboardService';
 import { DashboardData } from '@/service/dashboard/types';
 
 import StatCard from './StatCard';
-import WorldMapClient from './WorldMap.client';
 import TravelTrendChart from './TravelTrendChart.client';
-import { getMonthlyTravelCount } from '@/service/dashboard/dashboardService';
+import WorldMapClient from './WorldMap.client';
 
 interface Props {
   promiseDashBoard: Promise<CommonResponse<DashboardData>>;
