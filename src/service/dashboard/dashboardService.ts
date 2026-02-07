@@ -88,3 +88,32 @@ export const getDashboardStats = async (): Promise<CommonResponse<DashboardData>
     throw new Error('대시보드 데이터를 생성하는 중에 문제가 발생했습니다.');
   }
 };
+
+/** 월별 여행 횟수 집계 함수 */
+export const getMonthlyTravelCount = (travels: Travel[]) => {
+  const currentYear = new Date().getFullYear();
+
+  const monthly = Array.from({ length: 12 }, (_, i) => ({
+    month: i + 1,
+    count: 0,
+  }));
+
+  travels.forEach((t) => {
+    const start = t.date?.start;
+    if (!start) return;
+
+    const date = new Date(start);
+    if (isNaN(date.getTime())) return;
+
+    const year = date.getFullYear();
+    const monthIndex = date.getMonth();
+
+    if (year !== currentYear) return;
+    if (monthIndex < 0 || monthIndex > 11) return;
+    if (!monthly[monthIndex]) return;
+
+    monthly[monthIndex].count += 1;
+  });
+
+  return monthly;
+};
