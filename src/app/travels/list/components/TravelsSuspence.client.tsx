@@ -14,47 +14,52 @@ interface Props {
 }
 
 const TravelsSuspence = ({ promiseTravels }: Props) => {
-  const { data: travels, metadata } = use(promiseTravels);
-  const initialFilters = metadata?.filters;
+  const data = use(promiseTravels);
+  const initialFilters = data?.metadata?.filters;
 
-  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({
-    country: [],
-    year: [],
-  });
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
 
   // 필터링 로직
   const filteredTravels = useMemo(() => {
-    return travels.filter((t) => {
+    if (!data?.data) return [];
+
+    return data.data.filter((t) => {
       return Object.entries(selectedFilters).every(([type, codes]) => {
         if (codes.length === 0) return true;
-        if (type === 'country') return t.countryCode && codes.includes(t.countryCode);
-        if (type === 'year') {
-          const y = t.date?.start ? new Date(t.date.start).getFullYear().toString() : null;
-          return y && codes.includes(y);
-        }
+        if (type === 'country') return codes.includes(t.countryCode);
         return true;
       });
     });
-  }, [travels, selectedFilters]);
+  }, [data?.data, selectedFilters]);
 
   // 2. 실시간 개수가 반영된 필터 그룹 생성 (사이드바 렌더링용)
   const dynamicFilters = useMemo(() => {
-    return initialFilters?.map((group) => ({
+    if (!initialFilters || !data?.data) return [];
+
+    return initialFilters.map((group) => ({
       ...group,
       items: group.items.map((item) => {
-        const currentCount = filteredTravels.filter((t) => {
+        const count = data.data.filter((t) => {
+          const otherFilters = Object.entries(selectedFilters).filter(
+            ([type]) => type !== group.type
+          );
+
+          const passOtherFilters = otherFilters.every(([type, codes]) => {
+            if (codes.length === 0) return true;
+            if (type === 'country') return codes.includes(t.countryCode);
+            return true;
+          });
+
+          if (!passOtherFilters) return false;
           if (group.type === 'country') return t.countryCode === item.code;
-          if (group.type === 'year') {
-            const y = t.date?.start ? new Date(t.date.start).getFullYear().toString() : null;
-            return y === item.code;
-          }
-          return false;
+
+          return true;
         }).length;
 
-        return { ...item, count: currentCount };
+        return { ...item, count };
       }),
     }));
-  }, [filteredTravels, initialFilters]);
+  }, [data?.data, selectedFilters, initialFilters]);
 
   // 통합 핸들러
   const handleFilterChange = (type: string, code: string) => {

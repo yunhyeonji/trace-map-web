@@ -14,8 +14,10 @@ interface TravelCardProps {
 }
 
 export const TravelCard = ({ travel, isSelected = false, onClick }: TravelCardProps) => {
-  const dateText = travel.date ? formatDateRange(travel.date.start, travel.date.end) : '';
-  const companionsText = travel.companions.length > 0 ? travel.companions.join(', ') : '';
+  const dateText =
+    travel.startDate && travel.endDate ? formatDateRange(travel.startDate, travel.endDate) : '';
+  const companionsText =
+    travel.companions && travel.companions.length > 0 ? travel.companions.join(', ') : '';
 
   return (
     <Card
@@ -42,11 +44,13 @@ export const TravelCard = ({ travel, isSelected = false, onClick }: TravelCardPr
         )}
 
         <h3 className="group-hover:text-primary mb-2 line-clamp-2 text-xl font-bold tracking-tight transition-colors">
-          {travel.travelName}
+          {travel.title}
         </h3>
 
-        {travel.memo && (
-          <p className="text-muted-foreground mt-2 line-clamp-2 leading-relaxed">{travel.memo}</p>
+        {travel.description && (
+          <p className="text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+            {travel.description}
+          </p>
         )}
 
         <div className="text-muted-foreground mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">

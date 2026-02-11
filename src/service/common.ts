@@ -15,11 +15,17 @@ export interface CommonResponse<T> {
   };
 }
 
+export interface FilterItem {
+  name: string;
+  code: string;
+  count: number;
+}
+
 // 검색필터
 export interface FilterGroup {
   type: string;
   title: string;
-  items: { name: string; code: string; count: number }[];
+  items: FilterItem[];
 }
 
 // 페이지네이션
