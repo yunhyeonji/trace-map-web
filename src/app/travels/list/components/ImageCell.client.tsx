@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { Travel } from '@/service/travelsList/types';
 
 const ImageCell = ({ travel }: { travel: Travel }) => {
-  const hasImage = Boolean(travel.coverPhoto);
+  const hasImage = Boolean(travel.titleImageUrl);
   const [loaded, setLoaded] = useState(!hasImage);
 
   const handleImageLoad = () => {
@@ -23,11 +23,11 @@ const ImageCell = ({ travel }: { travel: Travel }) => {
         <div className="from-muted via-muted to-muted absolute inset-0 z-20 animate-pulse bg-linear-to-r" />
       )}
 
-      {travel.coverPhoto ? (
+      {travel.titleImageUrl ? (
         <>
           <Image
-            src={travel.coverPhoto}
-            alt={travel.travelName}
+            src={travel.titleImageUrl}
+            alt={travel.title}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className={cn(
