@@ -1,5 +1,6 @@
 import { CommonResponse } from '../common';
 import { Travel } from '../travelsList/types';
+
 import { DashboardData } from './types';
 
 /** 월별 여행 횟수 집계 함수 */

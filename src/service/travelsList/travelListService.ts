@@ -1,6 +1,7 @@
 // import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 import { CommonResponse } from '../common';
+
 import { Travel } from './types';
 
 // import { notionClient } from '@/lib/notion';
