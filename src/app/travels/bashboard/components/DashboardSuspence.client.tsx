@@ -35,8 +35,11 @@ function DashboardSuspence({ promiseDashBoard }: Props) {
     },
     {
       title: '최애 국가',
-      value: data.stats.mostVisited.name,
-      description: `가장 자주 간 나라는 ${data.stats.mostVisited.name}(${data.stats.mostVisited.count.toLocaleString()}회)이에요!`,
+      value: data.stats.mostVisited.name === '미정' ? '-' : data.stats.mostVisited.name,
+      description:
+        data.stats.mostVisited.name === '미정'
+          ? '아직 방문한 국가가 없어요!'
+          : `가장 자주 간 나라는 ${data.stats.mostVisited.name}(${data.stats.mostVisited.count.toLocaleString()}회)이에요!`,
       icon: <MapPin className={iconClassName} />,
     },
     {
