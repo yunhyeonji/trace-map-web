@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 
 import Image from 'next/image';
@@ -11,8 +12,11 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 
 import { ThemeToggle } from '../theme/themeToggle';
 import { Kbd, KbdGroup } from '../ui/kbd';
+import { usePathname } from 'next/navigation';
 
 const Header = () => {
+  const pathname = usePathname();
+
   return (
     <header className="bg-background/80 sticky top-0 z-30 border-b shadow backdrop-blur">
       {/* 모바일 헤더 */}
@@ -76,9 +80,16 @@ const Header = () => {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <Button size="icon-sm" variant="ghost" aria-label="새 여행 기록 추가">
-            <PlusIcon className="h-4 w-4" />
-          </Button>
+          {pathname === '/travels/list/create' ? (
+            <div className="bg-muted h-8 w-8 rounded-full" />
+          ) : (
+            <Link
+              href="/travels/list/create"
+              className="hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-full p-2"
+            >
+              <PlusIcon className="h-4 w-4" />
+            </Link>
+          )}
           <ThemeToggle />
           <Button size="icon-sm" variant="ghost" aria-label="프로필">
             <div className="bg-muted flex size-7 items-center justify-center rounded-full text-xs font-medium">
