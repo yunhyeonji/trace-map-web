@@ -5,22 +5,47 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useEffect, useState } from 'react';
 import { Plus, Trash, Calendar, MapPin, Search, GripVertical } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import ImageUpload from './ImageUpload.client';
+import { cn } from '@/lib/utils';
+import { MAP_CONFIG } from '@/lib/constants';
 
-type Place = { id: string | number; title: string; location: string; memo?: string };
+const MapView = dynamic(() => import('./MapView.client'), { ssr: false });
+
+type Place = {
+  id: string | number;
+  title: string;
+  location: string;
+  memo?: string;
+  lat?: number;
+  lon?: number;
+};
+
+type ImageFile = {
+  id: string;
+  file: File;
+  preview: string;
+  uploaded?: boolean;
+  url?: string;
+};
 
 export default function TravelForm() {
   const [places, setPlaces] = useState<Place[]>([]);
+  const [images, setImages] = useState<ImageFile[]>([]);
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Place[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // 장소 검색
   useEffect(() => {
     if (!searchOpen) return;
-    if (query.trim().length < 3) {
+    if (query.trim().length < MAP_CONFIG.SEARCH_MIN_LENGTH) {
       setResults([]);
       return;
     }
@@ -28,7 +53,7 @@ export default function TravelForm() {
     const id = setTimeout(async () => {
       setLoading(true);
       try {
-        const url = `${process.env.NEXT_PUBLIC_PLACE_SEARCH_URL}?format=json&q=${encodeURIComponent(query)}&limit=6`;
+        const url = `${MAP_CONFIG.NOMINATIM_API_URL}/search?format=json&q=${encodeURIComponent(query)}&limit=${MAP_CONFIG.SEARCH_LIMIT}`;
         const res = await fetch(url, {
           headers: {
             'User-Agent': 'trace-map-app',
@@ -37,15 +62,18 @@ export default function TravelForm() {
         const data = await res.json();
         const mapped = (data || []).map((d: any) => ({
           id: String(d.place_id || d.osm_id || d.lat + d.lon),
-          title: String(d.display_name || d.name || ''),
+          title: String(d.display_name?.split(',')[0] || d.name || ''),
           location: String(d.display_name || ''),
+          lat: parseFloat(d.lat),
+          lon: parseFloat(d.lon),
         }));
         setResults(mapped);
       } catch (e) {
+        console.error('Search error:', e);
         setResults([]);
       }
       setLoading(false);
-    }, 400);
+    }, MAP_CONFIG.SEARCH_DEBOUNCE_MS);
 
     return () => clearTimeout(id);
   }, [query, searchOpen]);
@@ -54,7 +82,14 @@ export default function TravelForm() {
     if (!places.some((p) => p.title === r.title)) {
       setPlaces((p) => [
         ...p,
-        { id: Date.now() + '-' + r.id, title: r.title, location: r.location, memo: '' },
+        {
+          id: Date.now() + '-' + r.id,
+          title: r.title,
+          location: r.location,
+          memo: '',
+          lat: r.lat,
+          lon: r.lon,
+        },
       ]);
     }
     setSearchOpen(false);
@@ -70,52 +105,52 @@ export default function TravelForm() {
     id && setPlaces((p) => p.filter((x) => x.id !== id));
   };
 
-  // drag and drop for reordering
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  // 드래그 앤 드롭
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
-  const handleDragStart = (e: any, index: number) => {
-    setDragIndex(index);
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
     e.dataTransfer.effectAllowed = 'move';
-    try {
-      e.dataTransfer.setData('text/plain', String(index));
-    } catch (err) {}
   };
 
-  const handleDragOver = (e: any, index: number) => {
+  const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
-    setDragOverIndex(index);
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e: any, index: number) => {
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
-    const from = dragIndex ?? Number(e.dataTransfer.getData('text/plain'));
-    const to = index;
-    if (from === null || from === to) {
-      setDragIndex(null);
-      setDragOverIndex(null);
+
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
       return;
     }
 
-    setPlaces((prev) => {
-      const next = [...prev];
-      const [moved] = next.splice(from, 1);
-      next.splice(to, 0, moved!);
-      return next;
-    });
+    const newPlaces = [...places];
+    const [draggedItem] = newPlaces.splice(draggedIndex, 1);
 
-    setDragIndex(null);
-    setDragOverIndex(null);
+    if (draggedItem) {
+      newPlaces.splice(dropIndex, 0, draggedItem);
+      setPlaces(newPlaces);
+    }
+
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const handleSubmit = async () => {
+    console.log('Submit data:', { places, images });
+    alert('저장 기능은 API 연결 후 구현됩니다.');
   };
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       {/* 좌측 지도 영역 */}
       <div className="lg:col-span-2">
-        <div className="bg-muted/20 h-130 w-full overflow-hidden rounded-lg border">
-          {/* 실제 맵 컴포넌트가 들어갈 자리 */}
-        </div>
+        <MapView places={places} />
 
         <div className="mt-6">
           <h4 className="mb-3 text-sm font-semibold text-neutral-400">다녀온 곳</h4>
@@ -123,39 +158,49 @@ export default function TravelForm() {
           <div className="flex flex-col gap-3">
             {places.length > 0 ? (
               places.map((place, idx) => (
-                <div
+                <Card
                   key={place.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, idx)}
                   onDragOver={(e) => handleDragOver(e, idx)}
                   onDrop={(e) => handleDrop(e, idx)}
-                  className={`flex items-center justify-between gap-4 rounded-lg border bg-transparent p-3 transition-colors ${
-                    dragIndex === idx ? 'opacity-60' : ''
-                  } ${dragOverIndex === idx ? 'bg-primary/20' : ''} hover:bg-primary/30`}
+                  onDragEnd={handleDragEnd}
+                  className={cn(
+                    'flex cursor-move flex-row items-center justify-between gap-4 p-3 transition-all',
+                    draggedIndex === idx && 'scale-95 opacity-40'
+                  )}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="cursor-grab px-2">
+                  <div className="flex flex-1 items-center gap-3">
+                    <div className="cursor-grab active:cursor-grabbing">
                       <GripVertical className="text-muted-foreground h-5 w-5" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="leading-tight font-semibold">{place.title}</div>
-                      <div className="text-muted-foreground truncate text-sm">{place.memo}</div>
+                      {place.memo && (
+                        <div className="text-muted-foreground mt-1 line-clamp-1 text-sm">
+                          {place.memo}
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <button
-                    className="text-muted-foreground hover:text-foreground rounded p-2 hover:bg-white/6"
-                    onClick={() => removePlace(place.id)}
-                    aria-label="삭제"
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removePlace(place.id);
+                    }}
                   >
                     <Trash className="h-4 w-4" />
-                  </button>
-                </div>
+                  </Button>
+                </Card>
               ))
             ) : (
-              <div className="text-muted-foreground rounded border px-4 py-6">
+              <Card className="text-muted-foreground border-dashed p-8 text-center">
                 다녀온 장소가 없습니다. 장소를 추가해주세요.
-              </div>
+              </Card>
             )}
           </div>
         </div>
@@ -163,131 +208,141 @@ export default function TravelForm() {
 
       {/* 우측 폼 영역 */}
       <div className="space-y-5">
-        {/* 우측에도 선택된 리스트 표시 (투명, hover시 강조) + 메모 입력 가능 */}
-        <div className="flex flex-col gap-3">
-          <Label>선택된 장소</Label>
-          {places.length > 0 &&
-            places.map((place) => (
-              <div
-                key={place.id}
-                className="bg-muted/20 rounded-lg border border-transparent p-3 transition-colors"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm leading-tight font-semibold">{place.title}</div>
-                      <div className="text-muted-foreground text-xs">{place.location}</div>
-                    </div>
-                    <Input
-                      value={place.memo || ''}
-                      placeholder="이 장소에 대한 메모를 입력하세요."
-                      onChange={(e) => updateMemo(place.id, e.target.value)}
-                      className="mt-2 w-full border-0 p-0 shadow-none focus:ring-0 focus-visible:ring-0"
-                    />
-                  </div>
-
-                  <button
-                    className="text-muted-foreground hover:text-foreground rounded p-2 hover:bg-white/6"
-                    onClick={() => removePlace(place.id)}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+        <div className="space-y-2">
+          <Label htmlFor="title">여행 제목</Label>
+          <Input id="title" placeholder="여행 제목을 입력하세요." />
         </div>
 
-        <div>
-          <button
-            onClick={() => setSearchOpen((s) => !s)}
-            className="text-primary hover:bg-primary/5 flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
-          >
-            <Plus className="h-4 w-4" /> 장소 추가하기
-          </button>
+        <div className="space-y-2">
+          <Label>여행 날짜</Label>
+          <div className="flex gap-2">
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <Calendar className="h-4 w-4" />
+              </InputGroupAddon>
+              <InputGroupInput type="date" />
+            </InputGroup>
 
-          {searchOpen && (
-            <div className="bg-card mt-3 rounded-md border p-3">
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <Calendar className="h-4 w-4" />
+              </InputGroupAddon>
+              <InputGroupInput type="date" />
+            </InputGroup>
+          </div>
+        </div>
+
+        {/* 장소 추가 - Popover로 변경 */}
+        <div className="space-y-2">
+          <Label>장소</Label>
+          <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full">
+                <Plus className="mr-2 h-4 w-4" />
+                장소 추가하기
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-(--radix-popover-trigger-width) p-3" align="start">
               <div className="flex items-center gap-2">
                 <Search className="text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="장소를 검색하세요 (3자 이상)"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  className="border-0 shadow-none focus-visible:ring-0"
                 />
               </div>
 
-              <div className="mt-3 flex max-h-52 flex-col gap-2 overflow-auto">
+              <div className="mt-3 max-h-60 space-y-1 overflow-auto">
                 {loading ? (
-                  <div className="text-muted-foreground text-sm">검색 중...</div>
+                  <div className="text-muted-foreground py-4 text-center text-sm">검색 중...</div>
                 ) : results.length > 0 ? (
                   results.map((r) => (
-                    <button
+                    <Button
                       key={r.id}
+                      variant="ghost"
+                      className="h-auto w-full justify-start py-2"
                       onClick={() => addPlaceFromResult(r)}
-                      className="hover:bg-muted/10 flex items-start gap-3 rounded-md px-3 py-2 text-left"
                     >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white/5">
-                        <MapPin className="h-4 w-4" />
+                      <div className="bg-primary/10 mr-3 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                        <MapPin className="text-primary h-4 w-4" />
                       </div>
-                      <div className="truncate">
+                      <div className="min-w-0 flex-1 text-left">
                         <div className="truncate font-medium">{r.title}</div>
-                        <div className="text-muted-foreground truncate text-sm">{r.location}</div>
+                        <div className="text-muted-foreground truncate text-xs">{r.location}</div>
                       </div>
-                    </button>
+                    </Button>
                   ))
                 ) : query.trim().length >= 3 ? (
-                  <div className="text-muted-foreground text-sm">검색 결과가 없습니다.</div>
+                  <div className="text-muted-foreground py-4 text-center text-sm">
+                    검색 결과가 없습니다.
+                  </div>
                 ) : (
-                  <div className="text-muted-foreground text-sm">3자 이상 입력하면 검색합니다.</div>
+                  <div className="text-muted-foreground py-4 text-center text-sm">
+                    3자 이상 입력하면 검색합니다.
+                  </div>
                 )}
               </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* 선택된 장소 목록 */}
+        {places.length > 0 && (
+          <div className="space-y-2">
+            <Label>선택된 장소</Label>
+            <div className="space-y-2">
+              {places.map((place) => (
+                <Card key={place.id} className="p-3">
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold">{place.title}</div>
+                      <div className="text-muted-foreground truncate text-xs">{place.location}</div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 shrink-0"
+                      onClick={() => removePlace(place.id)}
+                    >
+                      <Trash className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                  <Input
+                    value={place.memo || ''}
+                    placeholder="메모를 입력하세요"
+                    onChange={(e) => updateMemo(place.id, e.target.value)}
+                    className="h-8 text-sm"
+                  />
+                </Card>
+              ))}
             </div>
-          )}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="memo">메모</Label>
+          <Textarea
+            id="memo"
+            placeholder="여행에 대한 간단한 메모를 작성해보세요."
+            className="h-24 resize-none"
+          />
         </div>
 
         <div className="space-y-2">
-          <Label>여행 제목</Label>
-          <Input placeholder="여행 제목을 입력하세요." />
+          <Label htmlFor="companions">동행자</Label>
+          <Input id="companions" placeholder="여행을 함께한 친구를 기록해보세요." />
+          <p className="text-muted-foreground text-xs">예: 김철수, 홍길동</p>
         </div>
 
-        <div>
-          <Label>여행 날짜</Label>
-          <div className="mt-2 flex gap-2">
-            <InputGroup>
-              <InputGroupAddon align="inline-start">
-                <Calendar className="h-4 w-4" />
-              </InputGroupAddon>
-              <InputGroupInput type="date" />
-            </InputGroup>
-
-            <InputGroup>
-              <InputGroupAddon align="inline-start">
-                <Calendar className="h-4 w-4" />
-              </InputGroupAddon>
-              <InputGroupInput type="date" />
-            </InputGroup>
-          </div>
-        </div>
-
-        <div>
-          <Label>메모</Label>
-          <Textarea placeholder="여행에 대한 간단한 메모를 작성해보세요." className="mt-2 h-24" />
-        </div>
-
-        <div>
-          <Label>동행자</Label>
-          <Input placeholder="여행을 함께한 친구를 기록해보세요." className="mt-2" />
-          <div className="text-muted-foreground mt-2 text-sm">예: 김철수, 홍길동</div>
-        </div>
-
-        <div>
+        <div className="space-y-2">
           <Label>사진 추가 (선택)</Label>
-          <div className="border-input text-muted-foreground mt-2 flex h-28 w-full items-center justify-center rounded-md border border-dashed">
-            사진을 업로드하려면 클릭하거나 드래그하세요.
-          </div>
+          <ImageUpload images={images} onImagesChange={setImages} maxImages={10} />
         </div>
 
-        <Button className="w-full">저장하기</Button>
+        <Button className="w-full" onClick={handleSubmit}>
+          저장하기
+        </Button>
       </div>
     </div>
   );
