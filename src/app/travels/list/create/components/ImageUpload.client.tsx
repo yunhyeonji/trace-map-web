@@ -1,10 +1,12 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+
 import { Upload, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface ImageFile {
   id: string;

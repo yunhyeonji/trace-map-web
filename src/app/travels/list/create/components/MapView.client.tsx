@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { MapContainer, Marker, Polyline,Popup, TileLayer } from 'react-leaflet';
+
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+
 import { MAP_CONFIG } from '@/lib/constants';
+
+import 'leaflet/dist/leaflet.css';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({

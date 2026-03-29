@@ -1,21 +1,25 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
+
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+
+import { Calendar, GripVertical, MapPin, Plus, Search, Trash } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useEffect, useState } from 'react';
-import { Plus, Trash, Calendar, MapPin, Search, GripVertical } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import ImageUpload from './ImageUpload.client';
-import { cn } from '@/lib/utils';
+import { Textarea } from '@/components/ui/textarea';
 import { MAP_CONFIG } from '@/lib/constants';
+import { cn } from '@/lib/utils';
+import { createTravel, uploadTravelImages } from '@/service/travelsList/travelListService';
 import { TravelCreateRequest } from '@/service/travelsList/types';
-import { uploadTravelImages, createTravel } from '@/service/travelsList/travelListService';
+
+import ImageUpload from './ImageUpload.client';
 
 const MapView = dynamic(() => import('./MapView.client'), { ssr: false });
 
@@ -125,7 +129,7 @@ export default function TravelForm() {
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
@@ -257,7 +261,7 @@ export default function TravelForm() {
                     key={place.id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, idx)}
-                    onDragOver={(e) => handleDragOver(e, idx)}
+                    onDragOver={(e) => handleDragOver(e)}
                     onDrop={(e) => handleDrop(e, idx)}
                     onDragEnd={handleDragEnd}
                     className={cn(
