@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapContainer, Marker, Polyline,Popup, TileLayer } from 'react-leaflet';
+import { MapContainer, Marker, Polyline, Popup, TileLayer } from 'react-leaflet';
 
 import L from 'leaflet';
 
@@ -9,7 +9,7 @@ import { MAP_CONFIG } from '@/lib/constants';
 
 import 'leaflet/dist/leaflet.css';
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: MAP_CONFIG.LEAFLET_ICON.iconRetinaUrl,
   iconUrl: MAP_CONFIG.LEAFLET_ICON.iconUrl,
@@ -46,7 +46,7 @@ export default function MapView({ places, onPlaceClick }: MapViewProps) {
   }
 
   // lat, lon이 있는 장소만 필터링
-  const validPlaces = places.filter((p) => p.lat != null && p.lon != null);
+  const validPlaces = places.filter((p) => p.lat !== null && p.lon !== null);
 
   // 중심 좌표 계산 (안전하게)
   const center: [number, number] =
