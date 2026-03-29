@@ -33,7 +33,7 @@ export const getMonthlyTravelCount = (travels: Travel[]) => {
 };
 
 export const getDashboardStats = async (): Promise<CommonResponse<DashboardData>> => {
-  const res = await fetch(`${process.env.API_BASE_URL}/travels/dashboard`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/travels/dashboard`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

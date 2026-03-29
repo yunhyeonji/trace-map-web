@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import 'leaflet/dist/leaflet.css';
 
 /* 1. 다크모드 설정 */
 @custom-variant dark (&:is(.dark *));
