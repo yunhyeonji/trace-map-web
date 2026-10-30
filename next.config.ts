@@ -1,28 +1,5 @@
 import type { NextConfig } from 'next';
 
-const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8090',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'localhost',
-        port: '8090',
-        pathname: '/uploads/**',
-      },
-    ],
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-};
+const nextConfig: NextConfig = {};
 
-module.exports = nextConfig;
+export default nextConfig;

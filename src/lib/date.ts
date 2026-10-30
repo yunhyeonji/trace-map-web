@@ -1,18 +1,25 @@
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
-export function formatDate(date: string | number | Date | null, dateFormat = 'yyyy.MM.dd') {
+export function formatDate(date: string | null | undefined, dateFormat = 'yyyy.MM.dd') {
   if (!date) return '';
-  return format(new Date(date), dateFormat, { locale: ko });
+  return format(parseISO(date), dateFormat, { locale: ko });
 }
 
-export function formatDateRange(
-  start: string | number | Date | null,
-  end: string | number | Date | null
-): string {
+/** 2025.03.14 – 03.18 처럼 같은 해는 줄여서 보여준다 */
+export function formatDateRange(start: string, end?: string): string {
   if (!start) return '';
-  const startFormatted = formatDate(start);
-  if (!end || start === end) return startFormatted;
-  const endFormatted = formatDate(end);
-  return `${startFormatted} - ${endFormatted}`;
+  if (!end || start === end) return formatDate(start);
+  const sameYear = start.slice(0, 4) === end.slice(0, 4);
+  return `${formatDate(start)} – ${formatDate(end, sameYear ? 'MM.dd' : 'yyyy.MM.dd')}`;
+}
+
+/** 4박 5일 / 당일 */
+export function formatDuration(days: number): string {
+  if (days <= 1) return '당일';
+  return `${days - 1}박 ${days}일`;
+}
+
+export function today(): string {
+  return format(new Date(), 'yyyy-MM-dd');
 }

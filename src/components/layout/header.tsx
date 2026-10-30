@@ -3,151 +3,68 @@ import React from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname,useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
-import { ArrowLeftIcon,MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { Plus, Settings } from 'lucide-react';
 
 import Logo from '@/assets/image/logo.png';
 import { Button } from '@/components/ui/button';
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { cn } from '@/lib/utils';
 
 import { ThemeToggle } from '../theme/themeToggle';
-import { Kbd, KbdGroup } from '../ui/kbd';
+
+export const NAV_ITEMS = [
+  { href: '/', label: '홈' },
+  { href: '/trips', label: '기록' },
+];
+
+export function isActivePath(pathname: string, href: string) {
+  return href === '/' ? pathname === '/' : pathname.startsWith(href);
+}
 
 const Header = () => {
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const isCreatePage = pathname === '/travels/list/create';
-  const isDetailPage = pathname?.match(/\/travels\/list\/\d+$/);
-  const showBackButton = isCreatePage || isDetailPage;
+  const pathname = usePathname() ?? '/';
+  const isEditing = pathname.endsWith('/new') || pathname.endsWith('/edit');
 
   return (
-    <header className="bg-background/80 sticky top-0 z-30 border-b shadow backdrop-blur">
-      {/* 모바일 헤더 */}
-      <div className="container flex h-(--header-height) items-center gap-2 px-3 md:hidden">
-        {showBackButton ? (
-          // 작성/상세 페이지 - 뒤로가기
-          <>
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              onClick={() => router.back()}
-              aria-label="뒤로가기"
-            >
-              <ArrowLeftIcon className="h-5 w-5" />
-            </Button>
-            <span className="text-sm font-semibold">
-              {isCreatePage ? '여행 기록 작성' : '여행 상세'}
-            </span>
-          </>
-        ) : (
-          // 목록 페이지 - 로고
-          <Link href="/travels/dashboard" className="flex min-w-0 items-center gap-2">
-            <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-              <Image src={Logo} alt="TraceMap 로고" className="h-7 w-7 rounded-full object-cover" />
-            </div>
-            <div className="flex min-w-0 flex-col leading-tight">
-              <span className="text-muted-foreground truncate text-xs font-semibold tracking-tight">
-                TraceMap
-              </span>
-            </div>
-          </Link>
-        )}
+    <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur-xl">
+      <div className="container flex h-(--header-height) items-center gap-6">
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image src={Logo} alt="" className="size-8 rounded-full object-cover" priority />
+          <span className="text-[17px] font-bold tracking-tight">TraceMap</span>
+        </Link>
 
-        <div className="ml-auto flex shrink-0 items-center gap-1">
-          {!isCreatePage && (
-            <>
-              <Button size="icon-sm" variant="ghost" aria-label="검색">
-                <MagnifyingGlassIcon className="h-4 w-4" />
-              </Button>
-              <Link href="/travels/list/create">
-                <Button size="icon-sm" variant="ghost" aria-label="새 여행 기록 추가">
-                  <PlusIcon className="h-4 w-4" />
-                </Button>
-              </Link>
-            </>
-          )}
-          <ThemeToggle />
-          <Button size="icon-sm" variant="ghost" aria-label="프로필">
-            <div className="bg-muted flex size-7 items-center justify-center rounded-full text-xs font-medium">
-              TM
-            </div>
-          </Button>
-        </div>
-      </div>
-
-      {/* 데스크톱 헤더 */}
-      <div className="container hidden h-(--header-height) items-center gap-4 md:flex">
-        {showBackButton ? (
-          // 작성/상세 페이지 - 뒤로가기 + 타이틀
-          <>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => router.back()}
-              aria-label="뒤로가기"
-              className="shrink-0"
-            >
-              <ArrowLeftIcon className="h-5 w-5" />
-            </Button>
-            <h1 className="text-lg font-semibold">
-              {isCreatePage ? '여행 기록 작성' : '여행 상세'}
-            </h1>
-          </>
-        ) : (
-          // 목록 페이지 - 로고 + 검색
-          <>
-            <Link href="/travels/dashboard" className="flex items-center gap-2">
-              <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
-                <Image
-                  src={Logo}
-                  alt="TraceMap 로고"
-                  className="h-9 w-9 rounded-full object-cover"
-                />
-              </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-muted-foreground text-sm font-semibold tracking-tight">
-                  My Travel Log
-                </span>
-                <span className="text-base font-semibold tracking-tight">TraceMap</span>
-              </div>
-            </Link>
-
-            <div className="ml-6 max-w-xl flex-1">
-              <InputGroup className="bg-muted/60 text-muted-foreground focus-within:bg-background focus-within:text-foreground h-12 rounded-full">
-                <InputGroupInput
-                  placeholder="여행 기록, 도시, 친구를 검색해보세요"
-                  className="placeholder:text-muted-foreground/70 px-3 text-sm"
-                />
-                <InputGroupAddon align="inline-end">
-                  <KbdGroup>
-                    <Kbd className="bg-secondary text-muted-foreground/80 flex h-7 gap-1 rounded-full px-3 text-[11px]">
-                      <MagnifyingGlassIcon className="h-4 w-4" />
-                      <span>Search</span>
-                    </Kbd>
-                  </KbdGroup>
-                </InputGroupAddon>
-              </InputGroup>
-            </div>
-          </>
-        )}
-
-        <div className="ml-auto flex items-center gap-2">
-          {!isCreatePage && (
+        <nav className="hidden items-center gap-1 md:flex">
+          {NAV_ITEMS.map((item) => (
             <Link
-              href="/travels/list/create"
-              className="hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 rounded-full p-2 transition-colors"
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                isActivePath(pathname, item.href)
+                  ? 'bg-accent text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
             >
-              <PlusIcon className="h-5 w-5" />
+              {item.label}
             </Link>
-          )}
+          ))}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-1">
           <ThemeToggle />
-          <Button size="icon-sm" variant="ghost" aria-label="프로필">
-            <div className="bg-muted flex size-7 items-center justify-center rounded-full text-xs font-medium">
-              TM
-            </div>
+          <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
+            <Link href="/settings" aria-label="데이터 관리">
+              <Settings className="size-[1.15rem]" />
+            </Link>
           </Button>
+          {!isEditing && (
+            <Button asChild className="ml-2 hidden md:inline-flex">
+              <Link href="/trips/new">
+                <Plus />새 기록
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
