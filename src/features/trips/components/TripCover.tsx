@@ -14,10 +14,13 @@ function hueOf(seed: string) {
   return h;
 }
 
-/** 사진이 없을 때 나라별로 고정된 색의 그라데이션 커버 */
+/**
+ * 사진이 없을 때 나라별로 고정된 색의 그라데이션 커버.
+ * 팔레트(세이지~헌터 그린~토프)에서 벗어나지 않도록 색상을 올리브~청록 사이로 묶는다.
+ */
 export function coverGradient(seed: string) {
-  const h = hueOf(seed);
-  return `radial-gradient(120% 90% at 85% 10%, oklch(0.82 0.09 ${(h + 40) % 360}) 0%, transparent 55%), linear-gradient(140deg, oklch(0.62 0.1 ${h}) 0%, oklch(0.42 0.08 ${(h + 30) % 360}) 100%)`;
+  const h = 75 + (hueOf(seed) % 95);
+  return `radial-gradient(120% 90% at 85% 10%, oklch(0.84 0.05 ${h + 10}) 0%, transparent 55%), linear-gradient(140deg, oklch(0.6 0.06 ${h}) 0%, oklch(0.38 0.045 ${h + 15}) 100%)`;
 }
 
 interface TripCoverProps {

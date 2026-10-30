@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -25,24 +25,42 @@ export function isActivePath(pathname: string, href: string) {
 const Header = () => {
   const pathname = usePathname() ?? '/';
   const isEditing = pathname.endsWith('/new') || pathname.endsWith('/edit');
+  const [scrolled, setScrolled] = useState(false);
+
+  // 맨 위에서는 배경에 녹아 있다가, 스크롤하면 구분선과 그림자가 생긴다
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
-    <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur-xl">
+    <header
+      className={cn(
+        'glass sticky top-0 z-40 border-b transition-[border-color,box-shadow] duration-300',
+        scrolled
+          ? 'border-(--glass-line) shadow-[0_8px_24px_-12px_rgb(0_0_0/0.15)]'
+          : 'border-transparent'
+      )}
+    >
       <div className="container flex h-(--header-height) items-center gap-6">
         <Link href="/" className="flex items-center gap-2.5">
-          <Image src={Logo} alt="" className="size-8 rounded-full object-cover" priority />
+          {/* 투명 배경에 검은 선 로고라 다크 모드에서는 반전해 흰 선으로 보이게 한다 */}
+          <Image src={Logo} alt="" className="size-8 object-contain dark:invert" priority />
           <span className="text-[17px] font-bold tracking-tight">TraceMap</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        {/* 세그먼트 컨트롤 */}
+        <nav className="bg-foreground/[0.06] hidden items-center gap-0.5 rounded-full p-1 md:flex">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                'rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                'rounded-full px-4 py-1.5 text-sm font-medium transition-all',
                 isActivePath(pathname, item.href)
-                  ? 'bg-accent text-foreground'
+                  ? 'bg-card text-foreground shadow-[0_1px_3px_rgb(0_0_0/0.12)]'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >

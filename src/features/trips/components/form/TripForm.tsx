@@ -12,16 +12,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/toast';
 import { getCountry } from '@/lib/countries';
-import { formatDuration } from '@/lib/date';
 import { cn } from '@/lib/utils';
 
-import { tripDays } from '../../stats';
 import { useTrips } from '../../store';
 import { Place, Trip, TripDraft } from '../../types';
 import RouteMap from '../RouteMap';
 
 import ChipInput from './ChipInput';
 import CountryPicker from './CountryPicker';
+import DateRangePicker from './DateRangePicker';
 import PhotoPicker, { PhotoItem } from './PhotoPicker';
 import PlaceSearch, { PlaceResult } from './PlaceSearch';
 
@@ -140,10 +139,6 @@ export default function TripForm({ trip }: { trip?: Trip }) {
     }
   };
 
-  const days = draft.startDate
-    ? tripDays({ startDate: draft.startDate, endDate: draft.endDate || undefined })
-    : 0;
-
   return (
     <form onSubmit={handleSubmit} noValidate className="pb-28">
       <div className="container max-w-3xl py-8 md:py-12">
@@ -188,32 +183,24 @@ export default function TripForm({ trip }: { trip?: Trip }) {
               </Field>
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="떠난 날" required error={errors.startDate} htmlFor="startDate">
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={draft.startDate}
-                  onChange={(e) => set('startDate', e.target.value)}
-                  aria-invalid={!!errors.startDate}
-                />
-              </Field>
-              <Field
-                label="돌아온 날"
-                error={errors.endDate}
-                hint={days ? formatDuration(days) : '당일치기면 비워두세요'}
-                htmlFor="endDate"
-              >
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={draft.endDate ?? ''}
-                  min={draft.startDate || undefined}
-                  onChange={(e) => set('endDate', e.target.value)}
-                  aria-invalid={!!errors.endDate}
-                />
-              </Field>
-            </div>
+            <Field
+              label="여행 기간"
+              required
+              error={errors.startDate ?? errors.endDate}
+              hint="당일치기면 같은 날을 두 번 누르세요"
+              htmlFor="startDate"
+            >
+              <DateRangePicker
+                id="startDate"
+                startDate={draft.startDate}
+                endDate={draft.endDate ?? ''}
+                onChange={({ startDate, endDate }) => {
+                  set('startDate', startDate);
+                  set('endDate', endDate);
+                }}
+                invalid={!!(errors.startDate || errors.endDate)}
+              />
+            </Field>
           </Section>
 
           {/* 2. 장소 */}
@@ -384,7 +371,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="min-w-0 space-y-2">
       <div className="flex items-baseline justify-between gap-2">
         <Label htmlFor={htmlFor} className="text-[13px] font-semibold">
           {label}

@@ -19,8 +19,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#faf8f4' },
-    { media: '(prefers-color-scheme: dark)', color: '#1a1714' },
+    { media: '(prefers-color-scheme: light)', color: '#f5f4f0' },
+    { media: '(prefers-color-scheme: dark)', color: '#151a17' },
   ],
 };
 
@@ -35,7 +35,7 @@ export default function RootLayout({
         <Providers>
           <div className="flex min-h-dvh flex-col">
             <Header />
-            <main className="flex-1 pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))] md:pb-0">
+            <main className="flex-1 pb-(--tabbar-space) md:pb-0">
               {children}
             </main>
             <TabBar />

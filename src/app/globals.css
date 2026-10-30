@@ -6,86 +6,107 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  TraceMap 디자인 토큰
-  - 종이 같은 웜 뉴트럴 배경 + 짙은 청록(primary) + 노을빛 코랄(highlight)
+  TraceMap 디자인 토큰 — Earthy Forest Hues
+  - Dust Grey #DAD7CD · Dry Sage #A3B18A · Fern #588157 · Hunter Green #3A5A40 · Pine Teal #344E41
+  - 라이트: Hunter Green이 주색, Fern이 강조색, Dust Grey 계열이 배경과 지도
+  - 다크: 어두운 배경에서 읽히도록 Dry Sage가 주색
   - shadcn 컴포넌트가 쓰는 토큰 이름은 그대로 유지한다
 */
 :root {
-  --background: oklch(0.982 0.006 85);
-  --foreground: oklch(0.23 0.018 60);
+  --dust-grey: #dad7cd;
+  --dry-sage: #a3b18a;
+  --fern: #588157;
+  --hunter-green: #3a5a40;
+  --pine-teal: #344e41;
 
-  --card: oklch(1 0 0);
+  --background: #f5f4f0;
+  --foreground: #1f2a22;
+
+  --card: #ffffff;
   --card-foreground: var(--foreground);
-  --popover: oklch(1 0 0);
+  --popover: #ffffff;
   --popover-foreground: var(--foreground);
 
-  --primary: oklch(0.47 0.085 195);
-  --primary-foreground: oklch(0.99 0.004 85);
-  --primary-soft: oklch(0.94 0.03 195);
+  --primary: var(--hunter-green);
+  --primary-foreground: #f7f8f3;
+  --primary-soft: #e6ebdd;
 
-  --highlight: oklch(0.7 0.15 42);
-  --highlight-soft: oklch(0.95 0.035 50);
+  --highlight: var(--fern);
+  --highlight-soft: #e3ecdc;
 
-  --secondary: oklch(0.955 0.008 85);
+  --secondary: #ecebe5;
   --secondary-foreground: var(--foreground);
-  --muted: oklch(0.955 0.008 85);
-  --muted-foreground: oklch(0.53 0.015 65);
-  --accent: oklch(0.945 0.01 85);
+  --muted: #ecebe5;
+  --muted-foreground: #66706a;
+  --accent: #e7e6df;
   --accent-foreground: var(--foreground);
 
-  --destructive: oklch(0.58 0.2 27);
-  --destructive-foreground: oklch(0.99 0 0);
+  --destructive: #b4432f;
+  --destructive-foreground: #ffffff;
 
-  --border: oklch(0.91 0.01 85);
-  --input: oklch(0.89 0.012 85);
-  --ring: var(--primary);
+  --border: #e2e0d8;
+  --input: var(--dust-grey);
+  --ring: var(--fern);
 
-  --map-land: oklch(0.92 0.01 85);
-  --map-stroke: oklch(0.98 0.006 85);
+  --map-land: var(--dust-grey);
+  --map-stroke: #f5f4f0;
 
-  --shadow-card: 0 1px 2px oklch(0.3 0.02 60 / 0.04), 0 4px 16px -4px oklch(0.3 0.02 60 / 0.08);
-  --shadow-lift: 0 2px 4px oklch(0.3 0.02 60 / 0.05), 0 16px 40px -12px oklch(0.3 0.02 60 / 0.2);
+  --shadow-card: 0 1px 2px rgb(52 78 65 / 0.05), 0 4px 16px -4px rgb(52 78 65 / 0.1);
+  --shadow-lift: 0 2px 4px rgb(52 78 65 / 0.06), 0 16px 40px -12px rgb(52 78 65 / 0.25);
+
+  /* 글래스 (헤더, 모바일 탭바) */
+  --glass-bg: rgb(250 250 247 / 0.62);
+  --glass-edge: rgb(255 255 255 / 0.75);
+  --glass-line: rgb(52 78 65 / 0.1);
+  --glass-shadow: 0 1px 1px rgb(52 78 65 / 0.04), 0 12px 32px -8px rgb(52 78 65 / 0.22);
 
   --radius: 0.875rem;
   --header-height: 4rem;
-  --tabbar-height: 4.25rem;
+  --tabbar-height: 4rem;
+  /* 떠 있는 탭바가 차지하는 화면 아래쪽 공간 (탭바 + 바닥 여백 + 홈 인디케이터) */
+  --tabbar-space: calc(var(--tabbar-height) + 1.75rem + env(safe-area-inset-bottom));
 }
 
 .dark {
-  --background: oklch(0.165 0.008 60);
-  --foreground: oklch(0.95 0.006 85);
+  --background: #151a17;
+  --foreground: #eceee6;
 
-  --card: oklch(0.205 0.01 60);
+  --card: #1c221e;
   --card-foreground: var(--foreground);
-  --popover: oklch(0.225 0.01 60);
+  --popover: #212823;
   --popover-foreground: var(--foreground);
 
-  --primary: oklch(0.74 0.1 190);
-  --primary-foreground: oklch(0.18 0.02 200);
-  --primary-soft: oklch(0.29 0.04 195);
+  --primary: var(--dry-sage);
+  --primary-foreground: #18211b;
+  --primary-soft: #2a3a2f;
 
-  --highlight: oklch(0.76 0.14 45);
-  --highlight-soft: oklch(0.3 0.05 45);
+  --highlight: #c3d0a8;
+  --highlight-soft: #2f3d2c;
 
-  --secondary: oklch(0.25 0.01 60);
+  --secondary: #252c27;
   --secondary-foreground: var(--foreground);
-  --muted: oklch(0.25 0.01 60);
-  --muted-foreground: oklch(0.68 0.012 75);
-  --accent: oklch(0.27 0.01 60);
+  --muted: #252c27;
+  --muted-foreground: #a2aba3;
+  --accent: #2a322c;
   --accent-foreground: var(--foreground);
 
-  --destructive: oklch(0.65 0.19 25);
-  --destructive-foreground: oklch(0.99 0 0);
+  --destructive: #e07a63;
+  --destructive-foreground: #18211b;
 
-  --border: oklch(0.29 0.01 60);
-  --input: oklch(0.33 0.012 60);
-  --ring: var(--primary);
+  --border: #2d352f;
+  --input: #38423b;
+  --ring: var(--dry-sage);
 
-  --map-land: oklch(0.28 0.01 60);
-  --map-stroke: oklch(0.2 0.01 60);
+  --map-land: #2c342e;
+  --map-stroke: #1c221e;
 
   --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 16px -4px oklch(0 0 0 / 0.4);
   --shadow-lift: 0 2px 4px oklch(0 0 0 / 0.3), 0 16px 40px -12px oklch(0 0 0 / 0.6);
+
+  --glass-bg: rgb(28 34 30 / 0.58);
+  --glass-edge: rgb(255 255 255 / 0.09);
+  --glass-line: rgb(255 255 255 / 0.07);
+  --glass-shadow: 0 1px 1px rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.6);
 }
 
 @theme inline {
@@ -148,6 +169,14 @@
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Apple 스타일 반투명 재질: 뒤 콘텐츠를 흐리게 + 채도를 살짝 올리고, 위쪽 가장자리에 빛 반사 */
+@utility glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: inset 0 1px 0 var(--glass-edge);
 }
 
 /* Leaflet 기본 UI를 서비스 톤에 맞춘다 */

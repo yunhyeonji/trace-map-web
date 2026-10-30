@@ -28,29 +28,31 @@ export default function TabBar() {
       <Link
         key={href}
         href={href}
+        aria-current={active ? 'page' : undefined}
         className={cn(
-          'flex flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors',
-          active ? 'text-foreground' : 'text-muted-foreground'
+          'flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full text-[10.5px] font-semibold transition-all active:scale-95',
+          active ? 'bg-foreground/[0.07] text-foreground' : 'text-muted-foreground'
         )}
       >
-        <Icon className="size-5" strokeWidth={active ? 2.4 : 1.8} />
+        <Icon className="size-[22px]" strokeWidth={active ? 2.3 : 1.8} />
         {label}
       </Link>
     );
   };
 
+  // 화면 아래에 떠 있는 글래스 캡슐
   return (
-    <nav className="bg-background/90 fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
-      <div className="flex h-(--tabbar-height) items-stretch px-2">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-40 flex justify-center px-4 md:hidden">
+      <div className="glass pointer-events-auto flex h-(--tabbar-height) w-full max-w-sm items-stretch gap-1 rounded-full border border-(--glass-line) p-1.5 shadow-(--glass-shadow)">
         {tab(home!)}
         {tab(trips!)}
         <div className="flex flex-1 items-center justify-center">
           <Link
             href="/trips/new"
             aria-label="새 기록"
-            className="bg-primary text-primary-foreground shadow-lift flex size-12 items-center justify-center rounded-full transition-transform active:scale-95"
+            className="bg-primary text-primary-foreground flex size-12 items-center justify-center rounded-full shadow-[0_6px_16px_-4px_var(--primary)] transition-transform active:scale-90"
           >
-            <Plus className="size-6" />
+            <Plus className="size-6" strokeWidth={2.4} />
           </Link>
         </div>
         {tab(settings!)}
