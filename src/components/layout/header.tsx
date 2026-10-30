@@ -1,90 +1,88 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { Plus, Settings } from 'lucide-react';
 
 import Logo from '@/assets/image/logo.png';
 import { Button } from '@/components/ui/button';
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { cn } from '@/lib/utils';
 
 import { ThemeToggle } from '../theme/themeToggle';
-import { Kbd, KbdGroup } from '../ui/kbd';
+
+export const NAV_ITEMS = [
+  { href: '/', label: '홈' },
+  { href: '/trips', label: '기록' },
+];
+
+export function isActivePath(pathname: string, href: string) {
+  return href === '/' ? pathname === '/' : pathname.startsWith(href);
+}
 
 const Header = () => {
+  const pathname = usePathname() ?? '/';
+  const isEditing = pathname.endsWith('/new') || pathname.endsWith('/edit');
+  const [scrolled, setScrolled] = useState(false);
+
+  // 맨 위에서는 배경에 녹아 있다가, 스크롤하면 구분선과 그림자가 생긴다
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <header className="bg-background/80 sticky top-0 z-30 border-b shadow backdrop-blur">
-      {/* 모바일 헤더 */}
-      <div className="container flex h-(--header-height) items-center gap-2 px-3 md:hidden">
-        <Link href="/travels/bashboard" className="flex min-w-0 items-center gap-2">
-          <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-            <Image src={Logo} alt="TraceMap 로고" className="h-7 w-7 rounded-full object-cover" />
-          </div>
-          <div className="flex min-w-0 flex-col leading-tight">
-            <span className="text-muted-foreground truncate text-xs font-semibold tracking-tight">
-              TraceMap
-            </span>
-          </div>
+    <header
+      className={cn(
+        'glass sticky top-0 z-40 border-b transition-[border-color,box-shadow] duration-300',
+        scrolled
+          ? 'border-(--glass-line) shadow-[0_8px_24px_-12px_rgb(0_0_0/0.15)]'
+          : 'border-transparent'
+      )}
+    >
+      <div className="container flex h-(--header-height) items-center gap-6">
+        <Link href="/" className="flex items-center gap-2.5">
+          {/* 투명 배경에 검은 선 로고라 다크 모드에서는 반전해 흰 선으로 보이게 한다 */}
+          <Image src={Logo} alt="" className="size-8 object-contain dark:invert" priority />
+          <span className="text-[17px] font-bold tracking-tight">TraceMap</span>
         </Link>
 
-        <div className="ml-auto flex shrink-0 items-center gap-1">
-          <Button size="icon-sm" variant="ghost" aria-label="검색">
-            <MagnifyingGlassIcon className="h-4 w-4" />
-          </Button>
-          <Button size="icon-sm" variant="ghost" aria-label="새 여행 기록 추가">
-            <PlusIcon className="h-4 w-4" />
-          </Button>
+        {/* 세그먼트 컨트롤 */}
+        <nav className="bg-foreground/[0.06] hidden items-center gap-0.5 rounded-full p-1 md:flex">
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'rounded-full px-4 py-1.5 text-sm font-medium transition-all',
+                isActivePath(pathname, item.href)
+                  ? 'bg-card text-foreground shadow-[0_1px_3px_rgb(0_0_0/0.12)]'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-1">
           <ThemeToggle />
-          <Button size="icon-sm" variant="ghost" aria-label="프로필">
-            <div className="bg-muted flex size-7 items-center justify-center rounded-full text-xs font-medium">
-              TM
-            </div>
+          <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
+            <Link href="/settings" aria-label="데이터 관리">
+              <Settings className="size-[1.15rem]" />
+            </Link>
           </Button>
-        </div>
-      </div>
-
-      {/* 데스크톱 헤더 */}
-      <div className="container hidden h-(--header-height) items-center gap-4 md:flex">
-        <Link href="/travels/bashboard" className="flex items-center gap-2">
-          <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
-            <Image src={Logo} alt="TraceMap 로고" className="h-9 w-9 rounded-full object-cover" />
-          </div>
-          <div className="flex flex-col leading-tight">
-            <span className="text-muted-foreground text-sm font-semibold tracking-tight">
-              My Travel Log
-            </span>
-            <span className="text-base font-semibold tracking-tight">TraceMap</span>
-          </div>
-        </Link>
-
-        <div className="ml-6 max-w-xl flex-1">
-          <InputGroup className="bg-muted/60 text-muted-foreground focus-within:bg-background focus-within:text-foreground h-12 rounded-full">
-            <InputGroupInput
-              placeholder="여행 기록, 도시, 친구를 검색해보세요"
-              className="placeholder:text-muted-foreground/70 px-3 text-sm"
-            />
-            <InputGroupAddon align="inline-end">
-              <KbdGroup>
-                <Kbd className="bg-secondary text-muted-foreground/80 flex h-7 gap-1 rounded-full px-3 text-[11px]">
-                  <MagnifyingGlassIcon className="h-4 w-4" />
-                  <span>Search</span>
-                </Kbd>
-              </KbdGroup>
-            </InputGroupAddon>
-          </InputGroup>
-        </div>
-
-        <div className="ml-auto flex items-center gap-2">
-          <Button size="icon-sm" variant="ghost" aria-label="새 여행 기록 추가">
-            <PlusIcon className="h-4 w-4" />
-          </Button>
-          <ThemeToggle />
-          <Button size="icon-sm" variant="ghost" aria-label="프로필">
-            <div className="bg-muted flex size-7 items-center justify-center rounded-full text-xs font-medium">
-              TM
-            </div>
-          </Button>
+          {!isEditing && (
+            <Button asChild className="ml-2 hidden md:inline-flex">
+              <Link href="/trips/new">
+                <Plus />새 기록
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>

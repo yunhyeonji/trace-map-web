@@ -1,129 +1,118 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import 'leaflet/dist/leaflet.css';
 
-/* 1. 다크모드 설정 */
 @custom-variant dark (&:is(.dark *));
 
-/* 2. 전역 컬러 팔레트 (Primitive Palette)
-   - 실제 색상 값을 여기서 한 번에 관리합니다. 
-   - 500이 기본, 600이 호버용으로 설계되었습니다.
+/*
+  TraceMap 디자인 토큰 — Earthy Forest Hues
+  - Dust Grey #DAD7CD · Dry Sage #A3B18A · Fern #588157 · Hunter Green #3A5A40 · Pine Teal #344E41
+  - 라이트: Hunter Green이 주색, Fern이 강조색, Dust Grey 계열이 배경과 지도
+  - 다크: 어두운 배경에서 읽히도록 Dry Sage가 주색
+  - shadcn 컴포넌트가 쓰는 토큰 이름은 그대로 유지한다
 */
 :root {
-  /* Blue Palette (Main / Info) */
-  --blue-50: hsl(210 100% 96%);
-  --blue-100: hsl(210 100% 90%);
-  --blue-500: hsl(217 91% 60%); /* 기본 포인트 */
-  --blue-600: hsl(217 91% 50%); /* 호버용 */
-  --blue-900: hsl(222 47% 11%); /* 텍스트용 */
+  --dust-grey: #dad7cd;
+  --dry-sage: #a3b18a;
+  --fern: #588157;
+  --hunter-green: #3a5a40;
+  --pine-teal: #344e41;
 
-  /* Green Palette (Success / Chart) */
-  --green-500: hsl(160 84% 39%);
-  --green-600: hsl(160 84% 30%);
+  --background: #f5f4f0;
+  --foreground: #1f2a22;
 
-  /* Red Palette (Destructive / Error) */
-  --red-500: hsl(0 84% 60%);
-  --red-600: hsl(0 84% 50%);
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
 
-  /* Yellow Palette (Warning / Chart) */
-  --yellow-500: hsl(45 93% 47%);
-  --yellow-600: hsl(45 93% 40%);
+  --primary: var(--hunter-green);
+  --primary-foreground: #f7f8f3;
+  --primary-soft: #e6ebdd;
 
-  /* Neutral (Slate/Zinc Mix) */
-  --neutral-50: hsl(210 40% 98%);
-  --neutral-100: hsl(214 32% 91%);
-  --neutral-400: hsl(215 16% 47%);
-  --neutral-900: hsl(222 47% 4%);
+  --highlight: var(--fern);
+  --highlight-soft: #e3ecdc;
+
+  --secondary: #ecebe5;
+  --secondary-foreground: var(--foreground);
+  --muted: #ecebe5;
+  --muted-foreground: #66706a;
+  --accent: #e7e6df;
+  --accent-foreground: var(--foreground);
+
+  --destructive: #b4432f;
+  --destructive-foreground: #ffffff;
+
+  --border: #e2e0d8;
+  --input: var(--dust-grey);
+  --ring: var(--fern);
+
+  --map-land: var(--dust-grey);
+  --map-stroke: #f5f4f0;
+
+  --shadow-card: 0 1px 2px rgb(52 78 65 / 0.05), 0 4px 16px -4px rgb(52 78 65 / 0.1);
+  --shadow-lift: 0 2px 4px rgb(52 78 65 / 0.06), 0 16px 40px -12px rgb(52 78 65 / 0.25);
+
+  /* 글래스 (헤더, 모바일 탭바) */
+  --glass-bg: rgb(250 250 247 / 0.62);
+  --glass-edge: rgb(255 255 255 / 0.75);
+  --glass-line: rgb(52 78 65 / 0.1);
+  --glass-shadow: 0 1px 1px rgb(52 78 65 / 0.04), 0 12px 32px -8px rgb(52 78 65 / 0.22);
+
+  --radius: 0.875rem;
+  --header-height: 4rem;
+  --tabbar-height: 4rem;
+  /* 떠 있는 탭바가 차지하는 화면 아래쪽 공간 (탭바 + 바닥 여백 + 홈 인디케이터) */
+  --tabbar-space: calc(var(--tabbar-height) + 1.75rem + env(safe-area-inset-bottom));
 }
 
-/* 3. 라이트모드 의미적 매핑 (Semantic Tokens)
-*/
-:root {
-  --background: var(--neutral-50);
-  --foreground: var(--blue-900);
-
-  --card: hsl(0 0% 100%);
-  --card-foreground: var(--blue-900);
-
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: var(--blue-900);
-
-  /* Primary & Hover */
-  --primary: var(--blue-500);
-  --primary-hover: var(--blue-600);
-  --primary-foreground: var(--neutral-50);
-
-  --secondary: var(--neutral-100);
-  --secondary-foreground: var(--blue-900);
-
-  --muted: var(--neutral-100);
-  --muted-foreground: var(--neutral-400);
-
-  --accent: var(--neutral-100);
-  --accent-foreground: var(--blue-900);
-
-  --destructive: var(--red-500);
-  --destructive-hover: var(--red-600);
-  --destructive-foreground: var(--neutral-50);
-
-  --border: var(--neutral-100);
-  --input: var(--neutral-100);
-  --ring: var(--blue-500);
-
-  /* 오버레이 */
-  --overlay: rgba(0, 0, 0, 0.5);
-
-  /* 차트: 팔레트에서 가져와서 관리 */
-  --chart-1: var(--blue-500);
-  --chart-2: var(--green-500);
-  --chart-3: var(--yellow-500);
-  --chart-4: hsl(280 65% 60%);
-  --chart-5: hsl(340 75% 55%);
-
-  --radius: 0.75rem;
-  --header-height: 5rem;
-  --sticky-offset: 1.5rem;
-  --sticky-top: calc(var(--header-height) + var(--sticky-offset));
-}
-
-/* 4. 다크모드 의미적 매핑 
-*/
 .dark {
-  --background: var(--neutral-900);
-  --foreground: var(--neutral-50);
+  --background: #151a17;
+  --foreground: #eceee6;
 
-  --card: var(--neutral-900);
-  --card-foreground: var(--neutral-50);
+  --card: #1c221e;
+  --card-foreground: var(--foreground);
+  --popover: #212823;
+  --popover-foreground: var(--foreground);
 
-  --popover: var(--neutral-900);
-  --popover-foreground: var(--neutral-50);
+  --primary: var(--dry-sage);
+  --primary-foreground: #18211b;
+  --primary-soft: #2a3a2f;
 
-  /* 다크모드에서는 가독성을 위해 한 단계 밝은 색을 쓰기도 합니다 */
-  --primary: var(--blue-500);
-  --primary-hover: var(--blue-100);
-  --primary-foreground: var(--blue-900);
+  --highlight: #c3d0a8;
+  --highlight-soft: #2f3d2c;
 
-  --secondary: hsl(217 33% 17%);
-  --secondary-foreground: var(--neutral-50);
+  --secondary: #252c27;
+  --secondary-foreground: var(--foreground);
+  --muted: #252c27;
+  --muted-foreground: #a2aba3;
+  --accent: #2a322c;
+  --accent-foreground: var(--foreground);
 
-  --muted: hsl(217 33% 17%);
-  --muted-foreground: var(--neutral-400);
+  --destructive: #e07a63;
+  --destructive-foreground: #18211b;
 
-  --accent: hsl(217 33% 17%);
-  --accent-foreground: var(--neutral-50);
+  --border: #2d352f;
+  --input: #38423b;
+  --ring: var(--dry-sage);
 
-  --destructive: hsl(0 63% 31%);
-  --destructive-foreground: var(--neutral-50);
+  --map-land: #2c342e;
+  --map-stroke: #1c221e;
 
-  --border: hsl(217 33% 17%);
-  --input: hsl(217 33% 17%);
-  --ring: var(--blue-500);
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 16px -4px oklch(0 0 0 / 0.4);
+  --shadow-lift: 0 2px 4px oklch(0 0 0 / 0.3), 0 16px 40px -12px oklch(0 0 0 / 0.6);
 
-  /* 오버레이 */
-  --overlay: rgba(0, 0, 0, 0.25);
+  --glass-bg: rgb(28 34 30 / 0.58);
+  --glass-edge: rgb(255 255 255 / 0.09);
+  --glass-line: rgb(255 255 255 / 0.07);
+  --glass-shadow: 0 1px 1px rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.6);
 }
 
-/* 5. 테마 인라인 설정 */
 @theme inline {
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -132,8 +121,10 @@
   --color-popover-foreground: var(--popover-foreground);
 
   --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-highlight: var(--highlight);
+  --color-highlight-soft: var(--highlight-soft);
 
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -148,32 +139,61 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
+  --shadow-card: var(--shadow-card);
+  --shadow-lift: var(--shadow-lift);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 10px);
 }
 
-/* 6. 기본 스타일 레이어 */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground antialiased;
+  html {
+    -webkit-tap-highlight-color: transparent;
   }
-  ::-webkit-scrollbar {
-    display: none;
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'ss06';
+    word-break: keep-all;
   }
 }
 
-.container {
-  @apply mx-auto max-w-6xl px-4;
-  width: 100%;
+@utility container {
+  @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Apple 스타일 반투명 재질: 뒤 콘텐츠를 흐리게 + 채도를 살짝 올리고, 위쪽 가장자리에 빛 반사 */
+@utility glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: inset 0 1px 0 var(--glass-edge);
+}
+
+/* Leaflet 기본 UI를 서비스 톤에 맞춘다 */
+.leaflet-container {
+  font-family: inherit;
+  background: var(--muted);
+}
+.leaflet-control-attribution {
+  font-size: 10px;
+}
+.leaflet-bar a {
+  color: var(--foreground) !important;
+}
+.dark .leaflet-tile-pane {
+  filter: brightness(0.8) contrast(1.1) saturate(0.7) invert(1) hue-rotate(180deg);
+}
+.tm-pin {
+  background: none;
+  border: none;
 }

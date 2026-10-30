@@ -1,27 +1,27 @@
 import React from 'react';
 
-import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import type { Metadata, Viewport } from 'next';
 
 import Header from '@/components/layout/header';
+import TabBar from '@/components/layout/tabBar';
 
 import './globals.css';
 
 import Providers from './provider';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
-
 export const metadata: Metadata = {
-  title: '여행을 떠나요',
-  description: '즐거운 마음으로 여행을 떠나는 사람들을 위한 서비스',
+  title: {
+    default: 'TraceMap — 나의 여행 기록장',
+    template: '%s · TraceMap',
+  },
+  description: '다녀온 여행을 사진·동선·이야기로 남기고, 세계 지도를 채워가는 개인 여행 기록장',
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f5f4f0' },
+    { media: '(prefers-color-scheme: dark)', color: '#151a17' },
+  ],
 };
 
 export default function RootLayout({
@@ -30,12 +30,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="ko" suppressHydrationWarning>
+      <body>
         <Providers>
-          <div className="flex min-h-screen flex-col">
+          <div className="flex min-h-dvh flex-col">
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 pb-(--tabbar-space) md:pb-0">
+              {children}
+            </main>
+            <TabBar />
           </div>
         </Providers>
       </body>
