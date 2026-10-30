@@ -39,7 +39,7 @@ async function searchPlaces(query: string, signal: AbortSignal): Promise<PlaceRe
   url.searchParams.set('accept-language', 'ko,en');
 
   const res = await fetch(url, { signal });
-  if (!res.ok) throw new Error('장소 검색에 실패했어요');
+  if (!res.ok) throw new Error('장소 검색에 실패했습니다');
   const data = (await res.json()) as NominatimItem[];
 
   return data.map((d) => ({
@@ -103,7 +103,7 @@ export default function PlaceSearch({ onPick }: { onPick: (place: PlaceResult) =
 
   return (
     <div ref={wrapRef} className="relative">
-      <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
+      <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
       <input
         value={query}
         onChange={(e) => {
@@ -118,24 +118,22 @@ export default function PlaceSearch({ onPick }: { onPick: (place: PlaceResult) =
           }
           if (e.key === 'Escape') setOpen(false);
         }}
-        placeholder="장소 이름으로 검색 (예: 에펠탑, 성산일출봉)"
-        className="bg-card border-input focus:border-ring focus:ring-ring/20 h-11 w-full rounded-xl border pr-10 pl-10 text-base outline-none focus:ring-4 md:text-sm"
+        placeholder="장소 검색"
+        className="bg-foreground/[0.06] placeholder:text-muted-foreground text-body h-9 w-full rounded-[10px] pr-9 pl-8 outline-none"
       />
       {status === 'loading' && (
-        <Loader2 className="text-muted-foreground absolute top-1/2 right-3.5 size-4 -translate-y-1/2 animate-spin" />
+        <Loader2 className="text-muted-foreground absolute top-1/2 right-2.5 size-4 -translate-y-1/2 animate-spin" />
       )}
 
       {showPanel && (
-        <div className="bg-popover shadow-lift animate-in fade-in-0 slide-in-from-top-1 absolute inset-x-0 top-[calc(100%+6px)] z-30 overflow-hidden rounded-2xl border">
+        <div className="bg-popover shadow-lift animate-in fade-in-0 slide-in-from-top-1 absolute inset-x-0 top-[calc(100%+6px)] z-30 overflow-hidden rounded-xl border">
           {status === 'error' ? (
-            <p className="text-muted-foreground px-4 py-6 text-center text-sm">
-              검색이 잠시 안 돼요. 조금 뒤에 다시 시도해주세요.
+            <p className="text-muted-foreground text-subheadline px-4 py-6 text-center">
+              검색할 수 없습니다. 잠시 후 다시 시도하세요.
             </p>
           ) : results.length === 0 ? (
-            <p className="text-muted-foreground px-4 py-6 text-center text-sm">
-              {status === 'loading'
-                ? '찾는 중…'
-                : '검색 결과가 없어요. 다른 이름으로 검색해보세요.'}
+            <p className="text-muted-foreground text-subheadline px-4 py-6 text-center">
+              {status === 'loading' ? '검색 중…' : '결과 없음'}
             </p>
           ) : (
             <ul className="max-h-80 overflow-y-auto p-1.5">
@@ -152,8 +150,8 @@ export default function PlaceSearch({ onPick }: { onPick: (place: PlaceResult) =
                       <MapPin className="size-4" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold">{r.name}</span>
-                      <span className="text-muted-foreground line-clamp-1 text-xs">
+                      <span className="text-body block truncate">{r.name}</span>
+                      <span className="text-muted-foreground text-footnote line-clamp-1">
                         {r.address}
                       </span>
                     </span>
@@ -162,9 +160,7 @@ export default function PlaceSearch({ onPick }: { onPick: (place: PlaceResult) =
               ))}
             </ul>
           )}
-          <p className="text-muted-foreground border-t px-4 py-2 text-[11px]">
-            검색 제공: OpenStreetMap Nominatim
-          </p>
+          <p className="text-muted-foreground text-caption border-t px-4 py-2">© OpenStreetMap</p>
         </div>
       )}
     </div>

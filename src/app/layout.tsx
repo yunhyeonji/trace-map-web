@@ -35,9 +35,7 @@ export default function RootLayout({
         <Providers>
           <div className="flex min-h-dvh flex-col">
             <Header />
-            <main className="flex-1 pb-(--tabbar-space) md:pb-0">
-              {children}
-            </main>
+            <main className="flex-1 pb-(--tabbar-space) md:pb-0">{children}</main>
             <TabBar />
           </div>
         </Providers>

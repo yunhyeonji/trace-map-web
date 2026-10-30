@@ -46,7 +46,7 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     db.getAllTrips()
       .then((all) => setTrips(sortTrips(all)))
-      .catch((e) => console.error('기록을 불러오지 못했어요', e))
+      .catch((e) => console.error('기록을 불러오지 못했습니다', e))
       .finally(() => setReady(true));
   }, []);
 
@@ -121,7 +121,7 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
   const importBackup = useCallback(async (file: File) => {
     const backup = JSON.parse(await file.text()) as Backup;
     if (backup?.app !== 'tracemap' || !Array.isArray(backup.trips)) {
-      throw new Error('TraceMap 백업 파일이 아니에요.');
+      throw new Error('TraceMap 백업 파일이 아닙니다.');
     }
     const photos: Photo[] = await Promise.all(
       (backup.photos ?? []).map(async (p) => ({
@@ -166,6 +166,6 @@ export function TripsProvider({ children }: { children: React.ReactNode }) {
 
 export function useTrips() {
   const ctx = useContext(TripsContext);
-  if (!ctx) throw new Error('useTrips는 TripsProvider 안에서 써야 해요.');
+  if (!ctx) throw new Error('useTrips는 TripsProvider 안에서 사용해야 합니다.');
   return ctx;
 }

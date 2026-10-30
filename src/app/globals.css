@@ -110,8 +110,43 @@
 }
 
 @theme inline {
+  /* Apple 기기에서는 SF Pro + Apple SD Gothic Neo, 그 밖에서는 Pretendard */
   --font-sans:
-    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard Variable', Pretendard,
+    system-ui, sans-serif;
+
+  /* Apple HIG 타입 스케일 (iOS 기본 크기 기준) */
+  --text-large-title: 2.125rem;
+  --text-large-title--line-height: 2.5625rem;
+  --text-large-title--font-weight: 700;
+  --text-large-title--letter-spacing: -0.025em;
+  --text-title1: 1.75rem;
+  --text-title1--line-height: 2.125rem;
+  --text-title1--font-weight: 700;
+  --text-title1--letter-spacing: -0.02em;
+  --text-title2: 1.375rem;
+  --text-title2--line-height: 1.75rem;
+  --text-title2--font-weight: 700;
+  --text-title2--letter-spacing: -0.015em;
+  --text-title3: 1.25rem;
+  --text-title3--line-height: 1.5625rem;
+  --text-title3--font-weight: 600;
+  --text-title3--letter-spacing: -0.01em;
+  --text-headline: 1.0625rem;
+  --text-headline--line-height: 1.375rem;
+  --text-headline--font-weight: 600;
+  --text-headline--letter-spacing: -0.01em;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.375rem;
+  --text-body--letter-spacing: -0.01em;
+  --text-callout: 1rem;
+  --text-callout--line-height: 1.3125rem;
+  --text-subheadline: 0.9375rem;
+  --text-subheadline--line-height: 1.25rem;
+  --text-footnote: 0.8125rem;
+  --text-footnote--line-height: 1.125rem;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -158,7 +193,6 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: 'ss06';
     word-break: keep-all;
   }
 }

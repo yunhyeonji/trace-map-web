@@ -39,7 +39,7 @@ function Tile({
   const url = item.pending?.url ?? stored;
 
   return (
-    <div className="group bg-muted relative aspect-square overflow-hidden rounded-xl">
+    <div className="group bg-muted relative aspect-square overflow-hidden rounded-lg">
       {url && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={url} alt="" className="h-full w-full object-cover" />
@@ -47,26 +47,26 @@ function Tile({
       <div
         className={cn(
           'absolute inset-0 transition-colors',
-          isCover && 'ring-primary rounded-xl ring-3 ring-inset'
+          isCover && 'ring-primary rounded-lg ring-3 ring-inset'
         )}
       />
       <button
         type="button"
         onClick={onCover}
         className={cn(
-          'absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold backdrop-blur transition-opacity',
+          'text-caption absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-full px-2 py-1 font-semibold backdrop-blur transition-opacity',
           isCover
             ? 'bg-primary text-primary-foreground'
             : 'bg-black/45 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100'
         )}
       >
         <Star className={cn('size-3', isCover && 'fill-current')} />
-        {isCover ? '대표' : '대표로'}
+        {isCover ? '대표' : '대표로 지정'}
       </button>
       <button
         type="button"
         onClick={onRemove}
-        aria-label="사진 빼기"
+        aria-label="사진 삭제"
         className="absolute top-1.5 right-1.5 rounded-full bg-black/50 p-1 text-white backdrop-blur hover:bg-black/70"
       >
         <X className="size-3.5" />
@@ -91,7 +91,7 @@ export default function PhotoPicker({
   const addFiles = async (files: FileList | File[] | null) => {
     if (!files) return;
     const images = Array.from(files).filter((f) => f.type.startsWith('image/'));
-    if (images.length > left) toast(`사진은 최대 ${max}장까지 넣을 수 있어요`, 'error');
+    if (images.length > left) toast(`최대 ${max}장까지 추가할 수 있습니다`, 'error');
     const picked = images.slice(0, Math.max(0, left));
     if (!picked.length) return;
 
@@ -108,7 +108,7 @@ export default function PhotoPicker({
       onChange(next);
       if (!coverId && next[0]) onCoverChange(next[0].id);
     } catch {
-      toast('일부 사진을 불러오지 못했어요', 'error');
+      toast('일부 사진을 추가하지 못했습니다', 'error');
     } finally {
       setBusy(false);
     }
@@ -157,31 +157,37 @@ export default function PhotoPicker({
             onCover={() => onCoverChange(item.id)}
           />
         ))}
-        {left > 0 && (
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            disabled={busy}
-            className={cn(
-              'text-muted-foreground hover:border-primary hover:text-primary flex aspect-square flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed transition-colors',
-              items.length === 0 && 'col-span-3 aspect-auto py-10 sm:col-span-4'
-            )}
-          >
-            {busy ? <Loader2 className="size-6 animate-spin" /> : <ImagePlus className="size-6" />}
-            <span className="text-xs font-medium">
-              {busy
-                ? '사진 정리 중…'
-                : items.length === 0
-                  ? '사진을 고르거나 여기로 끌어다 놓으세요'
-                  : '추가'}
-            </span>
-            {items.length === 0 && (
-              <span className="text-[11px] opacity-70">
-                최대 {max}장 · 자동으로 용량을 줄여 저장해요
-              </span>
-            )}
-          </button>
-        )}
+        {left > 0 &&
+          (items.length === 0 ? (
+            // 사진이 없을 때는 목록의 한 줄짜리 동작 버튼
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={busy}
+              className="text-primary text-body col-span-3 flex items-center gap-2 py-1 text-left sm:col-span-4"
+            >
+              {busy ? (
+                <Loader2 className="size-5 animate-spin" />
+              ) : (
+                <ImagePlus className="size-5" />
+              )}
+              {busy ? '처리 중…' : '사진 추가'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={busy}
+              aria-label="사진 추가"
+              className="bg-foreground/[0.05] text-muted-foreground active:bg-foreground/10 flex aspect-square items-center justify-center rounded-lg transition-colors"
+            >
+              {busy ? (
+                <Loader2 className="size-6 animate-spin" />
+              ) : (
+                <ImagePlus className="size-6" />
+              )}
+            </button>
+          ))}
       </div>
     </div>
   );

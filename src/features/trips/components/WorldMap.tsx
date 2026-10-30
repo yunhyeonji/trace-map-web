@@ -86,7 +86,7 @@ function WorldMap({ counts, onSelect }: WorldMapProps) {
 
       {tip && (
         <div
-          className="bg-foreground text-background shadow-lift pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[calc(100%+10px)] rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap"
+          className="bg-foreground text-background shadow-lift text-footnote pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[calc(100%+10px)] rounded-full px-3 py-1.5 font-semibold whitespace-nowrap"
           style={{ left: tip.x, top: tip.y }}
         >
           {tip.label}

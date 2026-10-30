@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { isActivePath } from './header';
 
 const TABS = [
-  { href: '/', label: '홈', icon: Map },
+  { href: '/', label: '지도', icon: Map },
   { href: '/trips', label: '기록', icon: BookOpen },
   { href: '/settings', label: '설정', icon: Settings },
 ];

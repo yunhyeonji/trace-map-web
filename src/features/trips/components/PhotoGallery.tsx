@@ -93,7 +93,7 @@ export default function PhotoGallery({ photoIds }: { photoIds: string[] }) {
               >
                 <ChevronLeft className="size-5" />
               </button>
-              <span className="tabular min-w-12 text-center text-sm">
+              <span className="tabular text-subheadline min-w-12 text-center">
                 {(index ?? 0) + 1} / {photoIds.length}
               </span>
               <button

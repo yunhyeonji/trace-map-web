@@ -4,15 +4,12 @@ import React, { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { ChevronDown, ChevronUp, Loader2, MapPinned, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, X } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { GroupedRow, GroupedSection } from '@/components/ui/grouped-list';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/toast';
 import { getCountry } from '@/lib/countries';
-import { cn } from '@/lib/utils';
 
 import { useTrips } from '../../store';
 import { Place, Trip, TripDraft } from '../../types';
@@ -23,8 +20,6 @@ import CountryPicker from './CountryPicker';
 import DateRangePicker from './DateRangePicker';
 import PhotoPicker, { PhotoItem } from './PhotoPicker';
 import PlaceSearch, { PlaceResult } from './PlaceSearch';
-
-type Errors = Partial<Record<'title' | 'countryCode' | 'startDate' | 'endDate', string>>;
 
 const EMPTY: TripDraft = {
   title: '',
@@ -40,13 +35,12 @@ const EMPTY: TripDraft = {
   tags: [],
 };
 
-function validate(d: TripDraft): Errors {
-  const e: Errors = {};
-  if (!d.title.trim()) e.title = '제목을 적어주세요';
-  if (!d.countryCode) e.countryCode = '나라를 골라주세요';
-  if (!d.startDate) e.startDate = '언제 떠났는지 알려주세요';
-  if (d.startDate && d.endDate && d.endDate < d.startDate) e.endDate = '시작일보다 빠를 수 없어요';
-  return e;
+const ROW_INPUT =
+  'text-body placeholder:text-muted-foreground w-full min-w-0 bg-transparent outline-none';
+
+/** iOS처럼 필수 항목이 채워져야 저장 버튼이 켜진다 */
+function canSave(d: TripDraft) {
+  return !!d.title.trim() && !!d.countryCode && !!d.startDate;
 }
 
 export default function TripForm({ trip }: { trip?: Trip }) {
@@ -60,14 +54,12 @@ export default function TripForm({ trip }: { trip?: Trip }) {
   const [photos, setPhotos] = useState<PhotoItem[]>(() =>
     (trip?.photoIds ?? []).map((id) => ({ id }))
   );
-  const [errors, setErrors] = useState<Errors>({});
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
   const set = <K extends keyof TripDraft>(key: K, value: TripDraft[K]) => {
     setDraft((d) => ({ ...d, [key]: value }));
     setDirty(true);
-    if (key in errors) setErrors((e) => ({ ...e, [key]: undefined }));
   };
 
   // 저장하지 않고 나가려 할 때 한 번 붙잡는다
@@ -102,14 +94,7 @@ export default function TripForm({ trip }: { trip?: Trip }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const found = validate(draft);
-    setErrors(found);
-    const firstError = Object.keys(found)[0];
-    if (firstError) {
-      document.getElementById(firstError)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      toast('필수 항목을 확인해주세요', 'error');
-      return;
-    }
+    if (!canSave(draft) || saving) return;
 
     setSaving(true);
     try {
@@ -130,66 +115,79 @@ export default function TripForm({ trip }: { trip?: Trip }) {
         newPhotos: photos.flatMap((p) => (p.pending ? [p.pending] : [])),
         removedPhotoIds: (trip?.photoIds ?? []).filter((id) => !photoIds.includes(id)),
       });
-      toast(trip ? '수정했어요' : '기록을 남겼어요');
+      toast(trip ? '변경 사항을 저장했습니다' : '기록을 추가했습니다');
       router.replace(`/trips/${saved.id}`);
     } catch (err) {
       console.error(err);
-      toast('저장하지 못했어요. 브라우저 저장 공간을 확인해주세요', 'error');
+      toast('저장하지 못했습니다. 브라우저 저장 공간을 확인하세요.', 'error');
       setSaving(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="pb-28">
-      <div className="container max-w-3xl py-8 md:py-12">
-        <h1 className="text-[28px] font-bold tracking-tight md:text-3xl">
-          {trip ? '기록 수정' : '새 여행 기록'}
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          <span className="text-highlight">*</span> 표시만 채우면 저장할 수 있어요. 나머지는 천천히.
-        </p>
+    <form onSubmit={handleSubmit} noValidate className="pb-16">
+      {/* iOS 시트의 내비게이션 바: 취소 · 제목 · 저장 */}
+      <div className="glass sticky top-(--header-height) z-30 border-b border-(--glass-line)">
+        <div className="container grid h-12 max-w-2xl grid-cols-[1fr_auto_1fr] items-center">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-primary text-body justify-self-start hover:opacity-70"
+          >
+            취소
+          </button>
+          <h1 className="text-headline">{trip ? '기록 편집' : '새 기록'}</h1>
+          <button
+            type="submit"
+            disabled={!canSave(draft) || saving}
+            className="text-primary text-headline disabled:text-muted-foreground/50 justify-self-end hover:opacity-70 disabled:hover:opacity-100"
+          >
+            {saving ? '저장 중…' : trip ? '완료' : '추가'}
+          </button>
+        </div>
+      </div>
 
-        <div className="mt-8 space-y-5">
-          {/* 1. 기본 정보 */}
-          <Section step={1} title="어디로, 언제 다녀왔나요?">
-            <Field label="제목" required error={errors.title} htmlFor="title">
-              <Input
-                id="title"
-                value={draft.title}
-                onChange={(e) => set('title', e.target.value)}
-                placeholder="예: 골목마다 노란 트램이 지나가던 리스본"
-                aria-invalid={!!errors.title}
-                maxLength={60}
+      <div className="container max-w-2xl space-y-8 py-6">
+        <GroupedSection>
+          <GroupedRow>
+            <input
+              id="title"
+              value={draft.title}
+              onChange={(e) => set('title', e.target.value)}
+              placeholder="제목"
+              maxLength={60}
+              className={ROW_INPUT}
+            />
+          </GroupedRow>
+          <GroupedRow>
+            <input
+              id="city"
+              value={draft.city ?? ''}
+              onChange={(e) => set('city', e.target.value)}
+              placeholder="도시"
+              className={ROW_INPUT}
+            />
+          </GroupedRow>
+        </GroupedSection>
+
+        <GroupedSection>
+          <GroupedRow>
+            <label htmlFor="countryCode" className="text-body">
+              나라
+            </label>
+            <div className="ml-auto">
+              <CountryPicker
+                id="countryCode"
+                value={draft.countryCode}
+                onChange={(code) => set('countryCode', code)}
               />
-            </Field>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="나라" required error={errors.countryCode} htmlFor="countryCode">
-                <div id="countryCode">
-                  <CountryPicker
-                    value={draft.countryCode}
-                    onChange={(code) => set('countryCode', code)}
-                    invalid={!!errors.countryCode}
-                  />
-                </div>
-              </Field>
-              <Field label="도시" htmlFor="city">
-                <Input
-                  id="city"
-                  value={draft.city ?? ''}
-                  onChange={(e) => set('city', e.target.value)}
-                  placeholder="예: 리스본"
-                />
-              </Field>
             </div>
-
-            <Field
-              label="여행 기간"
-              required
-              error={errors.startDate ?? errors.endDate}
-              hint="당일치기면 같은 날을 두 번 누르세요"
-              htmlFor="startDate"
-            >
+          </GroupedRow>
+          <GroupedRow>
+            <label htmlFor="startDate" className="text-body shrink-0">
+              기간
+            </label>
+            <div className="ml-auto min-w-0">
               <DateRangePicker
                 id="startDate"
                 startDate={draft.startDate}
@@ -198,75 +196,74 @@ export default function TripForm({ trip }: { trip?: Trip }) {
                   set('startDate', startDate);
                   set('endDate', endDate);
                 }}
-                invalid={!!(errors.startDate || errors.endDate)}
               />
-            </Field>
-          </Section>
+            </div>
+          </GroupedRow>
+        </GroupedSection>
 
-          {/* 2. 장소 */}
-          <Section
-            step={2}
-            title="다녀온 곳"
-            description="방문한 순서대로 추가하면 지도에 동선이 그려져요."
-          >
-            <PlaceSearch onPick={addPlace} />
-
-            {draft.places.length > 0 ? (
-              <>
-                <RouteMap places={draft.places} className="h-56 sm:h-72" />
-                <ol className="space-y-2">
-                  {draft.places.map((p, i) => (
-                    <li key={p.id} className="bg-background flex gap-3 rounded-xl border p-3">
-                      <span className="bg-primary text-primary-foreground flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold">
-                        {i + 1}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold">{p.name}</p>
-                        <p className="text-muted-foreground truncate text-xs">{p.address}</p>
-                        <input
-                          value={p.memo ?? ''}
-                          onChange={(e) => updatePlace(p.id, { memo: e.target.value })}
-                          placeholder="한 줄 메모 (선택)"
-                          className="placeholder:text-muted-foreground/70 focus:border-ring mt-2 w-full border-b border-dashed bg-transparent pb-1 text-base outline-none focus:border-solid md:text-[13px]"
-                        />
-                      </div>
-                      <div className="flex shrink-0 flex-col items-center">
-                        <IconBtn label="위로" disabled={i === 0} onClick={() => movePlace(i, -1)}>
-                          <ChevronUp />
-                        </IconBtn>
-                        <IconBtn
-                          label="아래로"
-                          disabled={i === draft.places.length - 1}
-                          onClick={() => movePlace(i, 1)}
-                        >
-                          <ChevronDown />
-                        </IconBtn>
-                      </div>
-                      <IconBtn
-                        label="장소 삭제"
-                        onClick={() =>
-                          set(
-                            'places',
-                            draft.places.filter((x) => x.id !== p.id)
-                          )
-                        }
-                      >
-                        <X />
-                      </IconBtn>
-                    </li>
-                  ))}
-                </ol>
-              </>
-            ) : (
-              <div className="text-muted-foreground flex items-center gap-3 rounded-xl border border-dashed p-4 text-sm">
-                <MapPinned className="size-5 shrink-0" />
-                아직 추가한 장소가 없어요. 위에서 검색해 추가해보세요.
+        <GroupedSection
+          header="다녀온 곳"
+          footer="방문한 순서대로 추가하면 지도에 경로가 표시됩니다."
+        >
+          <GroupedRow>
+            <div className="w-full">
+              <PlaceSearch onPick={addPlace} />
+            </div>
+          </GroupedRow>
+          {draft.places.length > 0 && (
+            <>
+              <div className="px-4 pb-3">
+                <RouteMap places={draft.places} className="h-52 rounded-lg border-0 sm:h-64" />
               </div>
-            )}
-          </Section>
+              {draft.places.map((p, i) => (
+                <GroupedRow key={p.id} className="items-start">
+                  <span className="bg-primary text-primary-foreground text-caption mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full font-semibold">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-body truncate">{p.name}</p>
+                    <input
+                      value={p.memo ?? ''}
+                      onChange={(e) => updatePlace(p.id, { memo: e.target.value })}
+                      placeholder="메모"
+                      aria-label={`${p.name} 메모`}
+                      className="text-subheadline text-muted-foreground placeholder:text-muted-foreground/60 focus:text-foreground mt-0.5 w-full bg-transparent outline-none"
+                    />
+                  </div>
+                  <div className="-mr-1 flex shrink-0 items-center">
+                    <IconBtn label="위로" disabled={i === 0} onClick={() => movePlace(i, -1)}>
+                      <ChevronUp />
+                    </IconBtn>
+                    <IconBtn
+                      label="아래로"
+                      disabled={i === draft.places.length - 1}
+                      onClick={() => movePlace(i, 1)}
+                    >
+                      <ChevronDown />
+                    </IconBtn>
+                    <IconBtn
+                      label="삭제"
+                      onClick={() =>
+                        set(
+                          'places',
+                          draft.places.filter((x) => x.id !== p.id)
+                        )
+                      }
+                    >
+                      <X />
+                    </IconBtn>
+                  </div>
+                </GroupedRow>
+              ))}
+            </>
+          )}
+        </GroupedSection>
 
-          {/* 3. 사진 */}
-          <Section step={3} title="사진" description="별표를 누른 사진이 커버가 돼요.">
+        <GroupedSection
+          header="사진"
+          footer={photos.length > 0 ? '별표를 누른 사진이 대표 사진이 됩니다.' : undefined}
+        >
+          <div className={photos.length > 0 ? 'p-2' : 'px-4 py-2.5'}>
             <PhotoPicker
               items={photos}
               coverId={draft.coverPhotoId}
@@ -276,112 +273,48 @@ export default function TripForm({ trip }: { trip?: Trip }) {
               }}
               onCoverChange={(id) => set('coverPhotoId', id)}
             />
-          </Section>
+          </div>
+        </GroupedSection>
 
-          {/* 4. 이야기 */}
-          <Section step={4} title="이야기">
-            <Field label="기억하고 싶은 순간" htmlFor="story">
-              <Textarea
-                id="story"
-                value={draft.story}
-                onChange={(e) => set('story', e.target.value)}
-                placeholder="무엇이 좋았나요? 다음엔 무엇을 다르게 하고 싶나요?"
-                className="min-h-40"
-              />
-            </Field>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="함께한 사람" hint="Enter로 추가" htmlFor="companions">
-                <ChipInput
-                  id="companions"
-                  values={draft.companions}
-                  onChange={(v) => set('companions', v)}
-                  placeholder="예: 지수"
-                />
-              </Field>
-              <Field label="태그" hint="Enter로 추가" htmlFor="tags">
-                <ChipInput
-                  id="tags"
-                  values={draft.tags}
-                  onChange={(v) => set('tags', v)}
-                  placeholder="예: 혼행, 맛집"
-                  prefix="#"
-                />
-              </Field>
-            </div>
-          </Section>
-        </div>
-      </div>
+        <GroupedSection header="메모">
+          <div className="px-4 py-1">
+            <Textarea
+              id="story"
+              value={draft.story}
+              onChange={(e) => set('story', e.target.value)}
+              placeholder="기억하고 싶은 내용"
+              className="text-body md:text-body min-h-32 rounded-none border-0 bg-transparent px-0 focus-visible:ring-0"
+            />
+          </div>
+        </GroupedSection>
 
-      {/* 저장 바 */}
-      <div className="bg-background/90 fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
-        <div className="container flex h-18 max-w-3xl items-center justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={() => router.back()} disabled={saving}>
-            취소
-          </Button>
-          <Button type="submit" size="lg" disabled={saving} className="min-w-32">
-            {saving && <Loader2 className="animate-spin" />}
-            {saving ? '저장 중' : trip ? '수정 완료' : '기록 저장'}
-          </Button>
-        </div>
+        <GroupedSection footer="Enter 또는 쉼표로 구분합니다.">
+          <GroupedRow className="items-start py-0">
+            <label htmlFor="companions" className="text-body w-24 shrink-0 py-[11px]">
+              함께한 사람
+            </label>
+            <ChipInput
+              id="companions"
+              values={draft.companions}
+              onChange={(v) => set('companions', v)}
+              placeholder="없음"
+            />
+          </GroupedRow>
+          <GroupedRow className="items-start py-0">
+            <label htmlFor="tags" className="text-body w-24 shrink-0 py-[11px]">
+              태그
+            </label>
+            <ChipInput
+              id="tags"
+              values={draft.tags}
+              onChange={(v) => set('tags', v)}
+              placeholder="없음"
+              prefix="#"
+            />
+          </GroupedRow>
+        </GroupedSection>
       </div>
     </form>
-  );
-}
-
-function Section({
-  step,
-  title,
-  description,
-  children,
-}: {
-  step: number;
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="bg-card shadow-card rounded-2xl border p-5 sm:p-7">
-      <div className="mb-5 flex items-start gap-3">
-        <span className="bg-primary-soft text-primary flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-bold">
-          {step}
-        </span>
-        <div>
-          <h2 className="text-[17px] font-bold tracking-tight">{title}</h2>
-          {description && <p className="text-muted-foreground mt-0.5 text-[13px]">{description}</p>}
-        </div>
-      </div>
-      <div className="space-y-5">{children}</div>
-    </section>
-  );
-}
-
-function Field({
-  label,
-  required,
-  error,
-  hint,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  error?: string;
-  hint?: string;
-  htmlFor?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="min-w-0 space-y-2">
-      <div className="flex items-baseline justify-between gap-2">
-        <Label htmlFor={htmlFor} className="text-[13px] font-semibold">
-          {label}
-          {required && <span className="text-highlight -ml-1">*</span>}
-        </Label>
-        {hint && !error && <span className="text-muted-foreground text-xs">{hint}</span>}
-      </div>
-      {children}
-      {error && <p className={cn('text-destructive text-xs font-medium')}>{error}</p>}
-    </div>
   );
 }
 
@@ -394,7 +327,7 @@ function IconBtn({
     <button
       type="button"
       aria-label={label}
-      className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-md p-1 disabled:opacity-25 [&_svg]:size-4"
+      className="text-muted-foreground hover:text-foreground rounded-md p-1.5 disabled:opacity-25 [&_svg]:size-4"
       {...props}
     >
       {children}

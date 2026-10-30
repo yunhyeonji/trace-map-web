@@ -14,7 +14,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from 'date-fns';
-import { CalendarDays, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsUpDown } from 'lucide-react';
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { formatDateRange, formatDuration, today } from '@/lib/date';
@@ -30,16 +30,14 @@ interface DateRangePickerProps {
   startDate: string;
   endDate: string;
   onChange: (range: { startDate: string; endDate: string }) => void;
-  invalid?: boolean;
 }
 
-/** 여행 기간을 달력 하나로 고른다. 첫 클릭은 떠난 날, 두 번째 클릭은 돌아온 날 */
+/** 여행 기간을 달력 하나로 고른다. 첫 클릭은 출발일, 두 번째 클릭은 도착일 */
 export default function DateRangePicker({
   id,
   startDate,
   endDate,
   onChange,
-  invalid,
 }: DateRangePickerProps) {
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState(() => startOfMonth(parseISO(startDate || today())));
@@ -76,54 +74,34 @@ export default function DateRangePicker({
           id={id}
           type="button"
           className={cn(
-            'bg-card border-input focus-visible:border-ring focus-visible:ring-ring/20 flex h-11 w-full items-center gap-2.5 rounded-xl border px-3.5 text-left text-base outline-none focus-visible:ring-4 md:text-sm',
-            open && 'border-ring ring-ring/20 ring-4',
-            invalid && 'border-destructive'
+            'text-body tabular flex items-center gap-1 outline-none',
+            open ? 'text-primary' : 'text-muted-foreground'
           )}
         >
-          <CalendarDays className="text-muted-foreground size-4 shrink-0" />
-          {startDate ? (
-            <>
-              <span className="tabular font-medium">
-                {formatDateRange(startDate, endDate || undefined)}
-              </span>
-              <span className="bg-primary-soft text-primary ml-auto rounded-full px-2 py-0.5 text-xs font-semibold">
-                {formatDuration(days)}
-              </span>
-            </>
-          ) : (
-            <span className="text-muted-foreground">떠난 날과 돌아온 날을 골라주세요</span>
-          )}
+          {startDate
+            ? `${formatDateRange(startDate, endDate || undefined)} (${formatDuration(days)})`
+            : '선택'}
+          <ChevronsUpDown className="size-3.5 opacity-60" />
         </button>
       </PopoverTrigger>
 
       <PopoverContent
-        align="start"
+        align="end"
         sideOffset={8}
-        className="w-auto max-w-[calc(100vw-2rem)] rounded-2xl p-0"
+        className="w-auto max-w-[calc(100vw-2rem)] rounded-xl p-0"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        {/* 안내 */}
-        <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
-          <p className="text-sm">
-            {!startDate || endDate ? (
-              <span className="text-muted-foreground">
-                <b className="text-foreground">떠난 날</b>을 골라주세요
-              </span>
-            ) : (
-              <span className="text-muted-foreground">
-                <b className="text-foreground">돌아온 날</b>을 골라주세요
-              </span>
-            )}
+        <div className="flex items-center justify-between gap-3 border-b px-4 py-2.5">
+          <p className="text-subheadline text-muted-foreground">
+            {!startDate || endDate ? '출발일 선택' : '도착일 선택'}
           </p>
           {startDate && (
             <button
               type="button"
               onClick={() => onChange({ startDate: '', endDate: '' })}
-              className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs font-medium"
+              className="text-primary text-subheadline"
             >
-              <X className="size-3.5" />
-              초기화
+              지우기
             </button>
           )}
         </div>
@@ -166,24 +144,24 @@ export default function DateRangePicker({
         )}
 
         {/* 하단 */}
-        <div className="flex items-center justify-between gap-2 border-t px-4 py-3">
+        <div className="flex items-center justify-between gap-2 border-t px-4 py-2.5">
           <button
             type="button"
             onClick={() => {
               setMonth(startOfMonth(new Date()));
               setView('days');
             }}
-            className="text-primary text-xs font-semibold"
+            className="text-primary text-subheadline"
           >
-            오늘로 이동
+            오늘
           </button>
           {picking && (
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="bg-muted hover:bg-accent rounded-full px-3 py-1.5 text-xs font-semibold"
+              className="text-primary text-subheadline font-semibold"
             >
-              당일치기로 할게요
+              당일로 완료
             </button>
           )}
         </div>
@@ -232,7 +210,7 @@ function Month({
         <button
           type="button"
           onClick={onTitleClick}
-          className="hover:bg-accent tabular rounded-full px-3 py-1 text-[15px] font-bold"
+          className="hover:bg-accent text-headline tabular rounded-full px-3 py-1"
         >
           {format(month, 'yyyy년 M월')}
         </button>
@@ -244,7 +222,7 @@ function Month({
         />
       </div>
 
-      <div className="grid grid-cols-7 text-center text-[11px] font-semibold">
+      <div className="text-caption grid grid-cols-7 text-center font-semibold">
         {WEEKDAYS.map((w, i) => (
           <span
             key={w}
@@ -292,7 +270,7 @@ function Month({
                 onClick={() => onPick(key)}
                 onMouseEnter={() => onHover(key)}
                 className={cn(
-                  'tabular relative mx-auto flex size-10 items-center justify-center rounded-full text-sm transition-colors',
+                  'tabular text-body relative mx-auto flex size-10 items-center justify-center rounded-full transition-colors',
                   isStart || isEnd
                     ? 'bg-primary text-primary-foreground font-bold shadow-sm'
                     : 'hover:bg-accent',
@@ -350,7 +328,7 @@ function MonthGrid({ value, onSelect }: { value: Date; onSelect: (month: Date) =
     <div className="w-[17.5rem] p-4 sm:w-[37rem]">
       <div className="mb-3 flex h-8 items-center justify-between">
         <NavButton label="이전 해" onClick={() => setYear((y) => y - 1)} />
-        <span className="tabular text-[15px] font-bold">{year}년</span>
+        <span className="text-headline tabular">{year}년</span>
         <NavButton label="다음 해" onClick={() => setYear((y) => y + 1)} right />
       </div>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -363,7 +341,7 @@ function MonthGrid({ value, onSelect }: { value: Date; onSelect: (month: Date) =
               type="button"
               onClick={() => onSelect(new Date(year, m, 1))}
               className={cn(
-                'h-11 rounded-xl text-sm font-medium transition-colors',
+                'text-subheadline h-11 rounded-xl transition-colors',
                 selected ? 'bg-primary text-primary-foreground' : 'hover:bg-accent',
                 current && !selected && 'text-primary font-bold'
               )}

@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { ThemeToggle } from '../theme/themeToggle';
 
 export const NAV_ITEMS = [
-  { href: '/', label: '홈' },
+  { href: '/', label: '지도' },
   { href: '/trips', label: '기록' },
 ];
 
@@ -48,7 +48,7 @@ const Header = () => {
         <Link href="/" className="flex items-center gap-2.5">
           {/* 투명 배경에 검은 선 로고라 다크 모드에서는 반전해 흰 선으로 보이게 한다 */}
           <Image src={Logo} alt="" className="size-8 object-contain dark:invert" priority />
-          <span className="text-[17px] font-bold tracking-tight">TraceMap</span>
+          <span className="text-headline">TraceMap</span>
         </Link>
 
         {/* 세그먼트 컨트롤 */}
@@ -58,7 +58,7 @@ const Header = () => {
               key={item.href}
               href={item.href}
               className={cn(
-                'rounded-full px-4 py-1.5 text-sm font-medium transition-all',
+                'text-subheadline rounded-full px-4 py-1.5 transition-all',
                 isActivePath(pathname, item.href)
                   ? 'bg-card text-foreground shadow-[0_1px_3px_rgb(0_0_0/0.12)]'
                   : 'text-muted-foreground hover:text-foreground'

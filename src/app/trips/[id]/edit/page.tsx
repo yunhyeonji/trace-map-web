@@ -29,11 +29,11 @@ export default function EditTripPage() {
     return (
       <div className="container py-16">
         <EmptyState
-          icon={<Compass className="size-5" />}
-          title="기록을 찾을 수 없어요"
+          icon={<Compass />}
+          title="기록을 찾을 수 없음"
           action={
             <Button asChild>
-              <Link href="/trips">기록 목록으로</Link>
+              <Link href="/trips">기록으로 돌아가기</Link>
             </Button>
           }
         />

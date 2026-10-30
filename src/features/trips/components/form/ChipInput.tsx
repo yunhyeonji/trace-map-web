@@ -28,15 +28,11 @@ export default function ChipInput({ id, values, onChange, placeholder, prefix }:
   };
 
   return (
-    <div
-      className={cn(
-        'bg-card border-input focus-within:border-ring focus-within:ring-ring/20 flex min-h-11 w-full min-w-0 flex-wrap items-center gap-1.5 rounded-xl border px-2 py-1.5 focus-within:ring-4'
-      )}
-    >
+    <div className={cn('flex min-h-11 w-full min-w-0 flex-wrap items-center gap-1.5 py-1.5')}>
       {values.map((v) => (
         <span
           key={v}
-          className="bg-muted inline-flex max-w-full min-w-0 items-center gap-1 rounded-full py-1 pr-1 pl-2.5 text-[13px] font-medium"
+          className="bg-muted text-footnote inline-flex max-w-full min-w-0 items-center gap-1 rounded-full py-1 pr-1 pl-2.5"
         >
           <span className="truncate">
             {prefix}
@@ -80,7 +76,7 @@ export default function ChipInput({ id, values, onChange, placeholder, prefix }:
         placeholder={values.length ? '' : placeholder}
         size={1}
         // 기본 너비(size=20)가 모바일에서 박스를 밀어내지 않도록 0에서 시작해 남은 공간만 채운다
-        className="h-7 w-0 min-w-20 flex-1 bg-transparent px-1.5 text-base outline-none md:text-sm"
+        className="text-body placeholder:text-muted-foreground h-7 w-0 min-w-20 flex-1 bg-transparent outline-none"
       />
     </div>
   );
