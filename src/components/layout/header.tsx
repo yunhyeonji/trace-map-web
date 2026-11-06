@@ -9,6 +9,7 @@ import { Plus, Settings } from 'lucide-react';
 
 import Logo from '@/assets/image/logo.png';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { cn } from '@/lib/utils';
 
 import { ThemeToggle } from '../theme/themeToggle';
@@ -26,6 +27,7 @@ const Header = () => {
   const pathname = usePathname() ?? '/';
   const isEditing = pathname.endsWith('/new') || pathname.endsWith('/edit');
   const [scrolled, setScrolled] = useState(false);
+  const auth = useAuth();
 
   // 맨 위에서는 배경에 녹아 있다가, 스크롤하면 구분선과 그림자가 생긴다
   useEffect(() => {
@@ -76,6 +78,7 @@ const Header = () => {
               <Settings className="size-[1.15rem]" />
             </Link>
           </Button>
+          {auth.enabled && auth.ready && <AccountButton />}
           {!isEditing && (
             <Button asChild className="ml-2 hidden md:inline-flex">
               <Link href="/trips/new">
@@ -88,5 +91,30 @@ const Header = () => {
     </header>
   );
 };
+
+/** 로그인했으면 이니셜 원, 아니면 로그인 버튼 */
+function AccountButton() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/login">로그인</Link>
+      </Button>
+    );
+  }
+
+  const name = (user.user_metadata?.name as string | undefined) ?? user.email ?? '?';
+  return (
+    <Link
+      href="/settings"
+      aria-label="계정"
+      title={user.email}
+      className="bg-primary-soft text-primary text-footnote mx-1 flex size-8 items-center justify-center rounded-full font-semibold uppercase"
+    >
+      {name.trim().charAt(0)}
+    </Link>
+  );
+}
 
 export default Header;

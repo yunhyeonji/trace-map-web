@@ -1,3 +1,4 @@
+import { TripRepository } from './repository';
 import { Photo, Trip } from './types';
 
 const DB_NAME = 'tracemap';
@@ -52,6 +53,9 @@ async function tx<T>(
   return result;
 }
 
+const getPhoto = (id: string) =>
+  tx('photos', 'readonly', (t) => promisify<Photo | undefined>(t.objectStore('photos').get(id)));
+
 export const db = {
   getAllTrips: () =>
     tx('trips', 'readonly', (t) => promisify<Trip[]>(t.objectStore('trips').getAll())),
@@ -71,11 +75,9 @@ export const db = {
       trip.photoIds.forEach((id) => photos.delete(id));
     }),
 
-  getPhoto: (id: string) =>
-    tx('photos', 'readonly', (t) => promisify<Photo | undefined>(t.objectStore('photos').get(id))),
+  getPhoto,
 
-  getAllPhotos: () =>
-    tx('photos', 'readonly', (t) => promisify<Photo[]>(t.objectStore('photos').getAll())),
+  getPhotoBlob: (id: string) => getPhoto(id).then((p) => p?.blob),
 
   putPhotos: (photos: Photo[]) =>
     tx('photos', 'readwrite', (t) => {
@@ -94,7 +96,7 @@ export const db = {
       t.objectStore('trips').clear();
       t.objectStore('photos').clear();
     }),
-};
+} satisfies TripRepository;
 
 export function createId() {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto

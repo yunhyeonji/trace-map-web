@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { createId, db } from './db';
+import { TripRepository } from './repository';
 import { Photo } from './types';
 
 const MAX_EDGE = 1600;
@@ -35,10 +36,19 @@ export async function processImage(file: File): Promise<Photo> {
 // 같은 사진을 여러 화면에서 쓸 때 object URL을 한 번만 만든다
 const urlCache = new Map<string, Promise<string | null>>();
 
+// 로그인 상태에 따라 TripsProvider가 바꿔 끼운다
+let source: Pick<TripRepository, 'getPhotoBlob'> = db;
+
+export function setPhotoSource(repo: Pick<TripRepository, 'getPhotoBlob'>) {
+  if (repo === source) return;
+  source = repo;
+  forgetPhotoUrls([...urlCache.keys()]);
+}
+
 export function photoUrl(id: string): Promise<string | null> {
   let cached = urlCache.get(id);
   if (!cached) {
-    cached = db.getPhoto(id).then((p) => (p ? URL.createObjectURL(p.blob) : null));
+    cached = source.getPhotoBlob(id).then((b) => (b ? URL.createObjectURL(b) : null));
     urlCache.set(id, cached);
   }
   return cached;

@@ -2,17 +2,31 @@
 
 import React, { useRef, useState } from 'react';
 
+import Link from 'next/link';
+
 import { format } from 'date-fns';
+import { ChevronRight } from 'lucide-react';
 
 import PageTitle from '@/components/layout/pageTitle';
 import ConfirmAlert from '@/components/ui/confirm-alert';
 import { GroupedButtonRow, GroupedRow, GroupedSection } from '@/components/ui/grouped-list';
 import { useToast } from '@/components/ui/toast';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { useTrips } from '@/features/trips/store';
 
-/** iOS 설정 앱 구성: 정보 → 백업 → 샘플 → 위험한 동작 순서 */
+/** iOS 설정 앱 구성: 계정 → 정보 → 백업 → 샘플 → 위험한 동작 순서 */
 export default function SettingsPage() {
-  const { trips, exportBackup, importBackup, clearAll, loadSamples } = useTrips();
+  const {
+    trips,
+    mode,
+    localTripCount,
+    uploadLocalTrips,
+    exportBackup,
+    importBackup,
+    clearAll,
+    loadSamples,
+  } = useTrips();
+  const auth = useAuth();
   const toast = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -53,9 +67,66 @@ export default function SettingsPage() {
       <PageTitle title="설정" />
 
       <div className="mt-6 space-y-8">
+        {auth.enabled && auth.ready && (
+          <GroupedSection header="계정">
+            {auth.user ? (
+              <>
+                <GroupedRow>
+                  <span className="text-body">로그인됨</span>
+                  <span className="text-muted-foreground text-body ml-auto truncate">
+                    {auth.user.email}
+                  </span>
+                </GroupedRow>
+                {localTripCount > 0 && (
+                  <GroupedButtonRow
+                    chevron={false}
+                    disabled={!!busy}
+                    onClick={() =>
+                      run('migration', async () => {
+                        const count = await uploadLocalTrips();
+                        toast(`이 기기의 기록 ${count}개를 계정으로 옮겼습니다`);
+                      })
+                    }
+                    className="text-primary text-body"
+                  >
+                    {busy === 'migration'
+                      ? '옮기는 중…'
+                      : `이 기기의 기록 ${localTripCount}개 옮기기`}
+                  </GroupedButtonRow>
+                )}
+                <GroupedButtonRow
+                  chevron={false}
+                  disabled={!!busy}
+                  onClick={() =>
+                    run('signout', async () => {
+                      await auth.signOut();
+                      toast('로그아웃했습니다');
+                    })
+                  }
+                  className="text-destructive text-body"
+                >
+                  로그아웃
+                </GroupedButtonRow>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="active:bg-accent flex min-h-11 items-center gap-3 rounded-xl px-4 py-2.5"
+              >
+                <span className="text-primary text-body">로그인하고 기기 간 동기화하기</span>
+                <ChevronRight className="text-muted-foreground/60 ml-auto size-4 shrink-0" />
+              </Link>
+            )}
+          </GroupedSection>
+        )}
+
         <GroupedSection
           header="저장 공간"
-          footer="기록은 이 브라우저에만 저장되며 다른 기기와 동기화되지 않습니다."
+          footer={
+            mode === 'remote'
+              ? '기록은 계정에 저장되며 로그인한 모든 기기에서 볼 수 있습니다.'
+              : '기록은 이 브라우저에만 저장되며 다른 기기와 동기화되지 않습니다.'
+          }
         >
           <GroupedRow>
             <span className="text-body">기록</span>
